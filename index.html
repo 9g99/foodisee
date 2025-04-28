@@ -21,11 +21,6 @@
       gap: 24px;
       padding: 16px;
     }
-    @media (min-width: 768px) {
-      .card-container {
-        grid-template-columns: repeat(4, 1fr);
-      }
-    }
     .card {
       background: #ffffff;
       border: 1px solid #e0e0e0;
@@ -37,7 +32,7 @@
       flex-direction: column;
       align-items: center;
       transition: box-shadow 0.2s;
-      height: 400px;
+      height: 1600px; /* 모바일에서 카드 크기를 8배로 확대 */
     }
     .card img {
       width: 100%;
@@ -59,6 +54,14 @@
       text-decoration: none;
       color: inherit;
       width: 100%;
+    }
+    @media (min-width: 768px) {
+      .card-container {
+        grid-template-columns: repeat(4, 1fr);
+      }
+      .card {
+        height: 400px; /* PC에서는 기존 카드 크기 유지 */
+      }
     }
   </style>
 </head>
