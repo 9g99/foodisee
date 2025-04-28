@@ -3,10 +3,54 @@
 <head>
   <meta charset="UTF-8">
   <title>근처 맛집 찾기</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+    }
+    .card-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      width: 220px;
+      padding: 16px;
+      box-sizing: border-box;
+      text-align: center;
+      transition: box-shadow 0.2s;
+    }
+    .card img {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+    .card-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .card-distance {
+      font-size: 14px;
+      color: #555;
+    }
+    .card a {
+      text-decoration: none;
+      color: inherit;
+    }
+  </style>
 </head>
 <body>
   <h1>내 주변 맛집 리스트</h1>
-  <ul id="places"></ul>
+  <div id="places" class="card-container"></div>
 
   <script>
     const places = [
@@ -37,20 +81,27 @@
       const userLat = position.coords.latitude;
       const userLng = position.coords.longitude;
 
-      const nearby = places.filter(place => {
+      const nearby = places.map(place => {
         const distance = getDistanceFromLatLonInKm(userLat, userLng, place.lat, place.lng);
-        return distance < 4; // 4km 이내만 표시
-      });
+        return { ...place, distance: distance.toFixed(1) };
+      }).filter(place => place.distance <= 4);
 
-      const ul = document.getElementById('places');
+      const container = document.getElementById('places');
       nearby.forEach(place => {
-        const li = document.createElement('li');
-        li.innerHTML = `<a href="https://maps.google.com/?q=${place.lat},${place.lng}" target="_blank">${place.name}</a>`;
-        ul.appendChild(li);
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <a href="https://maps.google.com/?q=${place.lat},${place.lng}" target="_blank">
+            <img src="https://via.placeholder.com/220x140.png?text=Food+Image" alt="${place.name}">
+            <div class="card-title">${place.name}</div>
+            <div class="card-distance">${place.distance} km 거리</div>
+          </a>
+        `;
+        container.appendChild(card);
       });
 
       if (nearby.length === 0) {
-        ul.innerHTML = '<li>근처에 등록된 맛집이 없습니다.</li>';
+        container.innerHTML = '<div>근처에 등록된 맛집이 없습니다.</div>';
       }
     }, function(error) {
       alert('위치 정보 접근이 거부되었습니다. 위치 권한을 허용해주세요.');
