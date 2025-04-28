@@ -112,10 +112,10 @@
           .then(response => response.text())
           .then(str => (new window.DOMParser()).parseFromString(str, "text/xml"))
           .then(data => {
-            const placemarks = data.getElementsByTagName('Placemark');
+            const placemarks = data.getElementsByTagNameNS('*', 'Placemark'); // ★ 여기 수정
             Array.from(placemarks).forEach(pm => {
-              const name = pm.getElementsByTagName('name')[0]?.textContent || "맛집";
-              const coordsText = pm.getElementsByTagName('coordinates')[0]?.textContent || "";
+              const name = pm.getElementsByTagNameNS('*', 'name')[0]?.textContent || "맛집";
+              const coordsText = pm.getElementsByTagNameNS('*', 'coordinates')[0]?.textContent || "";
               const [lng, lat] = coordsText.trim().split(',').map(Number);
 
               const distance = getDistanceFromLatLonInKm(userLat, userLng, lat, lng).toFixed(1);
