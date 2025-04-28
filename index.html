@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>근처 맛집 찾기</title>
+  <title>Foodisee 내 주변 맛집 보기</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -10,11 +10,21 @@
       margin: 0;
       padding: 20px;
     }
+    h1 {
+      font-size: 4rem;
+      text-align: left;
+      margin-left: 16px;
+    }
     .card-container {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
+      grid-template-columns: 1fr;
+      gap: 24px;
       padding: 16px;
+    }
+    @media (min-width: 768px) {
+      .card-container {
+        grid-template-columns: repeat(4, 1fr);
+      }
     }
     .card {
       background: #ffffff;
@@ -23,47 +33,51 @@
       width: 100%;
       padding: 16px;
       box-sizing: border-box;
-      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       transition: box-shadow 0.2s;
+      height: 400px;
     }
     .card img {
       width: 100%;
-      height: 140px;
+      height: 250px;
       object-fit: cover;
       border-radius: 8px;
       margin-bottom: 12px;
     }
     .card-title {
-      font-size: 18px;
+      font-size: 24px;
       font-weight: bold;
       margin-bottom: 8px;
     }
     .card-distance {
-      font-size: 14px;
+      font-size: 16px;
       color: #555;
     }
     .card a {
       text-decoration: none;
       color: inherit;
+      width: 100%;
     }
   </style>
 </head>
 <body>
-  <h1>내 주변 맛집 리스트</h1>
+  <h1>Foodisee 내 주변 맛집 보기</h1>
   <div id="places" class="card-container"></div>
 
   <script>
     const places = [
-      { name: "문래 맛집 1", lat: 37.5189, lng: 126.8946, img: "https://images.unsplash.com/photo-1555992336-03a23c5b4c96" },
-      { name: "문래 맛집 2", lat: 37.5180, lng: 126.8932, img: "https://images.unsplash.com/photo-1525610553991-2bede1a236e2" },
-      { name: "문래 맛집 3", lat: 37.5175, lng: 126.8961, img: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe" },
-      { name: "영등포구청 맛집 1", lat: 37.5242, lng: 126.8953, img: "https://images.unsplash.com/photo-1600891964599-f61ba0e24092" },
-      { name: "영등포구청 맛집 2", lat: 37.5248, lng: 126.8925, img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38" },
-      { name: "영등포구청 맛집 3", lat: 37.5235, lng: 126.8940, img: "https://images.unsplash.com/photo-1576866209830-ecf7b07a5d4c" },
-      { name: "영등포 맛집 1", lat: 37.5150, lng: 126.9075, img: "https://images.unsplash.com/photo-1598511721345-b6f64b2a70fd" },
-      { name: "영등포 맛집 2", lat: 37.5161, lng: 126.9080, img: "https://images.unsplash.com/photo-1565895405227-1ff8f27059a5" },
-      { name: "영등포 맛집 3", lat: 37.5165, lng: 126.9050, img: "https://images.unsplash.com/photo-1604152135912-04a142b5b79b" },
-      { name: "영등포 맛집 4", lat: 37.5170, lng: 126.9060, img: "https://images.unsplash.com/photo-1613145991415-04c224bf752c" },
+      { name: "문래 맛집 1", lat: 37.5189, lng: 126.8946, img: "https://images.unsplash.com/photo-1555992336-03a23c5b4c96?auto=format&fit=crop&w=800&q=80" },
+      { name: "문래 맛집 2", lat: 37.5180, lng: 126.8932, img: "https://images.unsplash.com/photo-1525610553991-2bede1a236e2?auto=format&fit=crop&w=800&q=80" },
+      { name: "문래 맛집 3", lat: 37.5175, lng: 126.8961, img: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=800&q=80" },
+      { name: "영등포구청 맛집 1", lat: 37.5242, lng: 126.8953, img: "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=800&q=80" },
+      { name: "영등포구청 맛집 2", lat: 37.5248, lng: 126.8925, img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=800&q=80" },
+      { name: "영등포구청 맛집 3", lat: 37.5235, lng: 126.8940, img: "https://images.unsplash.com/photo-1576866209830-ecf7b07a5d4c?auto=format&fit=crop&w=800&q=80" },
+      { name: "영등포 맛집 1", lat: 37.5150, lng: 126.9075, img: "https://images.unsplash.com/photo-1598511721345-b6f64b2a70fd?auto=format&fit=crop&w=800&q=80" },
+      { name: "영등포 맛집 2", lat: 37.5161, lng: 126.9080, img: "https://images.unsplash.com/photo-1565895405227-1ff8f27059a5?auto=format&fit=crop&w=800&q=80" },
+      { name: "영등포 맛집 3", lat: 37.5165, lng: 126.9050, img: "https://images.unsplash.com/photo-1604152135912-04a142b5b79b?auto=format&fit=crop&w=800&q=80" },
+      { name: "영등포 맛집 4", lat: 37.5170, lng: 126.9060, img: "https://images.unsplash.com/photo-1613145991415-04c224bf752c?auto=format&fit=crop&w=800&q=80" },
     ];
 
     function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
@@ -77,33 +91,59 @@
       return R * c;
     }
 
+    function reverseGeocode(lat, lng, callback) {
+      const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          callback(data.display_name);
+        })
+        .catch(() => {
+          callback("주소 정보를 가져올 수 없습니다.");
+        });
+    }
+
     navigator.geolocation.getCurrentPosition(function(position) {
       const userLat = position.coords.latitude;
       const userLng = position.coords.longitude;
 
-      const nearby = places.map(place => {
-        const distance = getDistanceFromLatLonInKm(userLat, userLng, place.lat, place.lng);
-        return { ...place, distance: distance.toFixed(1) };
-      }).filter(place => place.distance <= 4)
-        .sort((a, b) => a.distance - b.distance);
+      reverseGeocode(userLat, userLng, function(address) {
+        const container = document.getElementById('places');
 
-      const container = document.getElementById('places');
-      nearby.forEach(place => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
-          <a href="https://maps.google.com/?q=${place.lat},${place.lng}" target="_blank">
-            <img src="${place.img}" alt="${place.name}">
-            <div class="card-title">${place.name}</div>
-            <div class="card-distance">${place.distance} km 거리</div>
-          </a>
+        // 내 위치 카드 추가
+        const myCard = document.createElement('div');
+        myCard.className = 'card';
+        myCard.innerHTML = `
+          <div class="card-title">내 현재 위치</div>
+          <div class="card-distance">${address}</div>
         `;
-        container.appendChild(card);
+        container.appendChild(myCard);
+
+        // 맛집 카드 추가
+        const nearby = places.map(place => {
+          const distance = getDistanceFromLatLonInKm(userLat, userLng, place.lat, place.lng);
+          return { ...place, distance: distance.toFixed(1) };
+        }).filter(place => place.distance <= 4)
+          .sort((a, b) => a.distance - b.distance);
+
+        nearby.forEach(place => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <a href="https://maps.google.com/?q=${place.lat},${place.lng}" target="_blank">
+              <img src="${place.img}" alt="${place.name}">
+              <div class="card-title">${place.name}</div>
+              <div class="card-distance">${place.distance} km 거리</div>
+            </a>
+          `;
+          container.appendChild(card);
+        });
+
+        if (nearby.length === 0) {
+          container.innerHTML += '<div>근처에 등록된 맛집이 없습니다.</div>';
+        }
       });
 
-      if (nearby.length === 0) {
-        container.innerHTML = '<div>근처에 등록된 맛집이 없습니다.</div>';
-      }
     }, function(error) {
       alert('위치 정보 접근이 거부되었습니다. 위치 권한을 허용해주세요.');
     });
