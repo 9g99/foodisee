@@ -70,8 +70,6 @@
   <div id="places" class="card-container"></div>
 
   <script>
-    const places = [];
-
     function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
       const R = 6371;
       const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -109,6 +107,31 @@
           <div class="card-distance">${address}</div>
         `;
         container.appendChild(myCard);
+
+        fetch('https://9g99.github.io/foodisee-real.kml')
+          .then(response => response.text())
+          .then(str => (new window.DOMParser()).parseFromString(str, "text/xml"))
+          .then(data => {
+            const placemarks = data.getElementsByTagName('Placemark');
+            Array.from(placemarks).forEach(pm => {
+              const name = pm.getElementsByTagName('name')[0]?.textContent || "맛집";
+              const coordsText = pm.getElementsByTagName('coordinates')[0]?.textContent || "";
+              const [lng, lat] = coordsText.trim().split(',').map(Number);
+
+              const distance = getDistanceFromLatLonInKm(userLat, userLng, lat, lng).toFixed(1);
+
+              const card = document.createElement('div');
+              card.className = 'card';
+              card.innerHTML = `
+                <a href="https://maps.google.com/?q=${lat},${lng}" target="_blank">
+                  <img src="https://source.unsplash.com/featured/?food,restaurant" alt="${name}">
+                  <div class="card-title">${name}</div>
+                  <div class="card-distance">${distance} km 거리</div>
+                </a>
+              `;
+              container.appendChild(card);
+            });
+          });
       });
 
     }, function(error) {
