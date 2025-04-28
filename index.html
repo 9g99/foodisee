@@ -2,141 +2,141 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>foodisee</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Foodisee 내 주변 맛집 보기</title>
   <style>
     body {
       font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
       margin: 0;
-      background: #f5f5f5;
-    }
-    header {
-      background: #4CAF50;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-      font-size: 2rem;
-      font-weight: bold;
-    }
-    main {
-      padding: 2rem;
+      padding: 20px;
     }
     h1 {
-      font-size: 1.2rem;
-      text-align: center;
-      margin-bottom: 1rem;
+      font-size: 4rem;
+      text-align: left;
+      margin-left: 16px;
     }
-    .location {
-      text-align: center;
-      margin-bottom: 2rem;
-      font-size: 1rem;
-    }
-    iframe {
-      width: 100%;
-      height: 400px;
-      border: none;
-      border-radius: 10px;
-      margin-bottom: 2rem;
-    }
-    .card-list {
+    .card-container {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 1.5rem;
+      gap: 24px;
+      padding: 16px;
+    }
+    @media (min-width: 768px) {
+      .card-container {
+        grid-template-columns: repeat(4, 1fr);
+      }
     }
     .card {
-      background: white;
-      border-radius: 10px;
-      padding: 1.5rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      background: #ffffff;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      width: 100%;
+      padding: 16px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: box-shadow 0.2s;
+      height: 400px;
     }
-    .card h3 {
-      margin-top: 0;
-      margin-bottom: 0.5rem;
-      font-size: 1.2rem;
+    .card img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 12px;
     }
-    .card p {
-      margin: 0.2rem 0;
-      font-size: 0.95rem;
-      color: #333;
+    .card-title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .card-distance {
+      font-size: 16px;
+      color: #555;
+    }
+    .card a {
+      text-decoration: none;
+      color: inherit;
+      width: 100%;
     }
   </style>
 </head>
 <body>
-  <header>foodisee</header>
-  <main>
-    <h1>내 주변 맛집 찾기</h1>
-    <div class="location" id="current-location">
-      서울특별시 영등포구 당산동, 위도: 37.52393, 경도: 126.89872
-    </div>
+  <h1>Foodisee 내 주변 맛집 보기</h1>
 
-    <iframe src="https://www.google.com/maps/d/u/0/embed?mid=1g6Nlmx4DX38L0t0UAZnNQVd9aRd9trw&ehbc=2E312F" allowfullscreen></iframe>
+  <iframe src="https://www.google.com/maps/d/u/0/embed?mid=1g6Nlmx4DX38L0t0UAZnNQVd9aRd9trw&ehbc=2E312F" width="100%" height="600" style="border:0; margin-bottom: 24px;" allowfullscreen="" loading="lazy"></iframe>
 
-    <section class="card-list" id="restaurant-list">
-      <!-- 음식점 카드들이 여기에 생성됨 -->
-    </section>
-  </main>
+  <div id="places" class="card-container"></div>
 
   <script>
-    // 주변 음식점 샘플 데이터 (API 붙일 준비 완료된 구조)
-    const restaurants = [
-      {
-        name: "김밥천국 당산점",
-        address: "서울특별시 영등포구 당산로 123",
-        distance: "1.2km",
-        walkTime: "15분",
-        driveTime: "5분"
-      },
-      {
-        name: "한솥도시락 영등포점",
-        address: "서울특별시 영등포구 영등포로 56",
-        distance: "2.4km",
-        walkTime: "30분",
-        driveTime: "8분"
-      },
-      {
-        name: "돈까스클럽 문래점",
-        address: "서울특별시 영등포구 문래로 78",
-        distance: "3.5km",
-        walkTime: "45분",
-        driveTime: "12분"
-      },
-      {
-        name: "삼겹살이 맛있는 집",
-        address: "서울특별시 영등포구 양산로 13",
-        distance: "1.8km",
-        walkTime: "20분",
-        driveTime: "6분"
-      },
-      {
-        name: "카페베네 당산점",
-        address: "서울특별시 영등포구 당산로 87",
-        distance: "0.9km",
-        walkTime: "12분",
-        driveTime: "3분"
-      }
-    ];
-
-    function loadRestaurants() {
-      const list = document.getElementById("restaurant-list");
-      list.innerHTML = "";
-
-      restaurants.forEach(r => {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `
-          <h3>${r.name}</h3>
-          <p><strong>주소:</strong> ${r.address}</p>
-          <p><strong>거리:</strong> ${r.distance}</p>
-          <p><strong>도보:</strong> ${r.walkTime}</p>
-          <p><strong>차량:</strong> ${r.driveTime}</p>
-        `;
-        list.appendChild(card);
-      });
+    function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
     }
 
-    window.onload = function() {
-      loadRestaurants();
-    };
+    function reverseGeocode(lat, lng, callback) {
+      const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          callback(data.display_name);
+        })
+        .catch(() => {
+          callback("주소 정보를 가져올 수 없습니다.");
+        });
+    }
+
+    navigator.geolocation.getCurrentPosition(function(position) {
+      const userLat = position.coords.latitude;
+      const userLng = position.coords.longitude;
+
+      reverseGeocode(userLat, userLng, function(address) {
+        const container = document.getElementById('places');
+
+        const myCard = document.createElement('div');
+        myCard.className = 'card';
+        myCard.innerHTML = `
+          <div class="card-title">내 현재 위치</div>
+          <div class="card-distance">${address}</div>
+        `;
+        container.appendChild(myCard);
+
+        fetch('https://9g99.github.io/foodisee-real.kml')
+          .then(response => response.text())
+          .then(str => (new window.DOMParser()).parseFromString(str, "text/xml"))
+          .then(data => {
+            const placemarks = data.getElementsByTagName('Placemark');
+            Array.from(placemarks).forEach(pm => {
+              const name = pm.getElementsByTagName('name')[0]?.textContent || "맛집";
+              const coordsText = pm.getElementsByTagName('coordinates')[0]?.textContent || "";
+              const [lng, lat] = coordsText.trim().split(',').map(Number);
+
+              const distance = getDistanceFromLatLonInKm(userLat, userLng, lat, lng).toFixed(1);
+
+              const card = document.createElement('div');
+              card.className = 'card';
+              card.innerHTML = `
+                <a href="https://maps.google.com/?q=${lat},${lng}" target="_blank">
+                  <img src="https://source.unsplash.com/featured/?food,restaurant" alt="${name}">
+                  <div class="card-title">${name}</div>
+                  <div class="card-distance">${distance} km 거리</div>
+                </a>
+              `;
+              container.appendChild(card);
+            });
+          });
+      });
+
+    }, function(error) {
+      alert('위치 정보 접근이 거부되었습니다. 위치 권한을 허용해주세요.');
+    });
   </script>
 </body>
 </html>
