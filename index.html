@@ -11,16 +11,16 @@
       padding: 20px;
     }
     .card-container {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
       gap: 16px;
-      justify-content: center;
+      padding: 16px;
     }
     .card {
       background: #ffffff;
       border: 1px solid #e0e0e0;
       border-radius: 12px;
-      width: 220px;
+      width: 100%;
       padding: 16px;
       box-sizing: border-box;
       text-align: center;
@@ -54,16 +54,16 @@
 
   <script>
     const places = [
-      { name: "문래 맛집 1", lat: 37.5189, lng: 126.8946 },
-      { name: "문래 맛집 2", lat: 37.5180, lng: 126.8932 },
-      { name: "문래 맛집 3", lat: 37.5175, lng: 126.8961 },
-      { name: "영등포구청 맛집 1", lat: 37.5242, lng: 126.8953 },
-      { name: "영등포구청 맛집 2", lat: 37.5248, lng: 126.8925 },
-      { name: "영등포구청 맛집 3", lat: 37.5235, lng: 126.8940 },
-      { name: "영등포 맛집 1", lat: 37.5150, lng: 126.9075 },
-      { name: "영등포 맛집 2", lat: 37.5161, lng: 126.9080 },
-      { name: "영등포 맛집 3", lat: 37.5165, lng: 126.9050 },
-      { name: "영등포 맛집 4", lat: 37.5170, lng: 126.9060 },
+      { name: "문래 맛집 1", lat: 37.5189, lng: 126.8946, img: "https://images.unsplash.com/photo-1555992336-03a23c5b4c96" },
+      { name: "문래 맛집 2", lat: 37.5180, lng: 126.8932, img: "https://images.unsplash.com/photo-1525610553991-2bede1a236e2" },
+      { name: "문래 맛집 3", lat: 37.5175, lng: 126.8961, img: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe" },
+      { name: "영등포구청 맛집 1", lat: 37.5242, lng: 126.8953, img: "https://images.unsplash.com/photo-1600891964599-f61ba0e24092" },
+      { name: "영등포구청 맛집 2", lat: 37.5248, lng: 126.8925, img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38" },
+      { name: "영등포구청 맛집 3", lat: 37.5235, lng: 126.8940, img: "https://images.unsplash.com/photo-1576866209830-ecf7b07a5d4c" },
+      { name: "영등포 맛집 1", lat: 37.5150, lng: 126.9075, img: "https://images.unsplash.com/photo-1598511721345-b6f64b2a70fd" },
+      { name: "영등포 맛집 2", lat: 37.5161, lng: 126.9080, img: "https://images.unsplash.com/photo-1565895405227-1ff8f27059a5" },
+      { name: "영등포 맛집 3", lat: 37.5165, lng: 126.9050, img: "https://images.unsplash.com/photo-1604152135912-04a142b5b79b" },
+      { name: "영등포 맛집 4", lat: 37.5170, lng: 126.9060, img: "https://images.unsplash.com/photo-1613145991415-04c224bf752c" },
     ];
 
     function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
@@ -84,7 +84,8 @@
       const nearby = places.map(place => {
         const distance = getDistanceFromLatLonInKm(userLat, userLng, place.lat, place.lng);
         return { ...place, distance: distance.toFixed(1) };
-      }).filter(place => place.distance <= 4);
+      }).filter(place => place.distance <= 4)
+        .sort((a, b) => a.distance - b.distance);
 
       const container = document.getElementById('places');
       nearby.forEach(place => {
@@ -92,7 +93,7 @@
         card.className = 'card';
         card.innerHTML = `
           <a href="https://maps.google.com/?q=${place.lat},${place.lng}" target="_blank">
-            <img src="https://via.placeholder.com/220x140.png?text=Food+Image" alt="${place.name}">
+            <img src="${place.img}" alt="${place.name}">
             <div class="card-title">${place.name}</div>
             <div class="card-distance">${place.distance} km 거리</div>
           </a>
