@@ -38,20 +38,26 @@
       border-radius: 10px;
       margin-bottom: 2rem;
     }
-    ul {
-      list-style: none;
-      padding: 0;
+    .card-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
     }
-    ul li {
-      background: #eef;
-      margin-bottom: 1rem;
-      padding: 1rem;
-      border-radius: 8px;
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-    .distance-info {
-      font-size: 0.9rem;
-      color: #555;
-      margin-top: 0.5rem;
+    .card h3 {
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      font-size: 1.2rem;
+    }
+    .card p {
+      margin: 0.2rem 0;
+      font-size: 0.95rem;
+      color: #333;
     }
   </style>
 </head>
@@ -59,53 +65,78 @@
   <header>foodisee</header>
   <main>
     <h1>내 주변 맛집 찾기</h1>
-    <div class="location" id="current-location">현재 위치를 가져오는 중...</div>
+    <div class="location" id="current-location">
+      서울특별시 영등포구 당산동, 위도: 37.52393, 경도: 126.89872
+    </div>
 
     <iframe src="https://www.google.com/maps/d/u/0/embed?mid=1g6Nlmx4DX38L0t0UAZnNQVd9aRd9trw&ehbc=2E312F" allowfullscreen></iframe>
 
-    <ul id="restaurant-list">
-      <!-- 여기 주변 음식점 리스트가 들어감 -->
-    </ul>
+    <section class="card-list" id="restaurant-list">
+      <!-- 음식점 카드들이 여기에 생성됨 -->
+    </section>
   </main>
 
   <script>
-    function getLocation() {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(showPosition, showError);
-      } else {
-        document.getElementById("current-location").innerText = "이 브라우저는 위치 정보를 지원하지 않습니다.";
+    // 주변 음식점 샘플 데이터 (API 붙일 준비 완료된 구조)
+    const restaurants = [
+      {
+        name: "김밥천국 당산점",
+        address: "서울특별시 영등포구 당산로 123",
+        distance: "1.2km",
+        walkTime: "15분",
+        driveTime: "5분"
+      },
+      {
+        name: "한솥도시락 영등포점",
+        address: "서울특별시 영등포구 영등포로 56",
+        distance: "2.4km",
+        walkTime: "30분",
+        driveTime: "8분"
+      },
+      {
+        name: "돈까스클럽 문래점",
+        address: "서울특별시 영등포구 문래로 78",
+        distance: "3.5km",
+        walkTime: "45분",
+        driveTime: "12분"
+      },
+      {
+        name: "삼겹살이 맛있는 집",
+        address: "서울특별시 영등포구 양산로 13",
+        distance: "1.8km",
+        walkTime: "20분",
+        driveTime: "6분"
+      },
+      {
+        name: "카페베네 당산점",
+        address: "서울특별시 영등포구 당산로 87",
+        distance: "0.9km",
+        walkTime: "12분",
+        driveTime: "3분"
       }
+    ];
+
+    function loadRestaurants() {
+      const list = document.getElementById("restaurant-list");
+      list.innerHTML = "";
+
+      restaurants.forEach(r => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <h3>${r.name}</h3>
+          <p><strong>주소:</strong> ${r.address}</p>
+          <p><strong>거리:</strong> ${r.distance}</p>
+          <p><strong>도보:</strong> ${r.walkTime}</p>
+          <p><strong>차량:</strong> ${r.driveTime}</p>
+        `;
+        list.appendChild(card);
+      });
     }
 
-    function showPosition(position) {
-      const lat = position.coords.latitude;
-      const lon = position.coords.longitude;
-
-      // 주소 변환 (Geocoding API 필요) 없이 그냥 좌표 출력
-      document.getElementById("current-location").innerText = `위도: ${lat.toFixed(5)}, 경도: ${lon.toFixed(5)}`;
-
-      // 👉 여기서 Places API로 '실제 음식점 리스트'를 가져와야 하는데
-      // API Key가 없으므로 현재는 샘플 코드로 남겨둠
-    }
-
-    function showError(error) {
-      switch(error.code) {
-        case error.PERMISSION_DENIED:
-          document.getElementById("current-location").innerText = "위치 정보 접근이 거부되었습니다.";
-          break;
-        case error.POSITION_UNAVAILABLE:
-          document.getElementById("current-location").innerText = "위치 정보를 사용할 수 없습니다.";
-          break;
-        case error.TIMEOUT:
-          document.getElementById("current-location").innerText = "위치 정보를 가져오는 데 시간이 초과되었습니다.";
-          break;
-        case error.UNKNOWN_ERROR:
-          document.getElementById("current-location").innerText = "알 수 없는 오류가 발생했습니다.";
-          break;
-      }
-    }
-
-    window.onload = getLocation;
+    window.onload = function() {
+      loadRestaurants();
+    };
   </script>
 </body>
 </html>
