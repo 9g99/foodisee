@@ -39,7 +39,7 @@
 
       const nearby = places.filter(place => {
         const distance = getDistanceFromLatLonInKm(userLat, userLng, place.lat, place.lng);
-        return distance < 2; // 2km 이내만 표시
+        return distance < 4; // 4km 이내만 표시
       });
 
       const ul = document.getElementById('places');
