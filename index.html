@@ -27,42 +27,42 @@
       font-size: 2.5rem;
       color: #555;
       text-align: left;
-      margin-top: 24px; /* 원래 위치 복구 */
+      margin-top: 24px;
       line-height: 1.4;
+    }
+    .selected-location {
+      font-size: 1.5rem;
+      color: #333;
+      margin-top: 16px;
+      text-align: left;
     }
 
     /* 검색 영역 */
     .search-container {
       display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 16px;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 8px;
+      margin-top: 24px;
       margin-bottom: 32px;
     }
     #locationInput {
-      width: 100%;
+      flex: 1;
       max-width: 600px;
       font-size: 2rem;
       padding: 20px;
       border: 1px solid #ccc;
-      border-radius: 16px; /* 둥글게 */
+      border-radius: 9999px; /* 완전 둥글게 */
       outline: none;
     }
     .search-container button {
-      width: 100%;
-      max-width: 200px;
       font-size: 2rem;
-      padding: 20px;
+      padding: 20px 24px;
       border: 1px solid #ccc;
-      border-radius: 16px; /* 둥글게 */
+      border-radius: 9999px; /* 완전 둥글게 */
       background-color: #007bff;
       color: white;
       cursor: pointer;
-    }
-    .selected-location {
-      font-size: 1.5rem;
-      color: #333;
-      margin-top: 8px;
     }
 
     /* 카드 영역 */
@@ -135,13 +135,13 @@
     <div class="title-sub">
       My current location
     </div>
+    <div id="selectedLocation" class="selected-location"></div>
   </div>
 
   <!-- 검색 영역 -->
   <div class="search-container">
     <input type="text" id="locationInput" placeholder="지역 또는 주소를 검색하세요" />
     <button onclick="searchLocation()">검색</button>
-    <div id="selectedLocation" class="selected-location"></div>
   </div>
 
   <!-- 지도 영역 -->
