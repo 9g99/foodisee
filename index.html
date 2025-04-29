@@ -97,7 +97,7 @@
 
     .card-container {
       display: grid;
-      grid-template-columns: repeat(2, 1fr); /* 2열 배치 */
+      grid-template-columns: repeat(2, 1fr);
       gap: 24px;
       padding: 0 32px;
     }
@@ -135,13 +135,13 @@
     }
 
     .card-title {
-      font-size: 36px; /* 음식점 이름 확대 */
+      font-size: 36px;
       font-weight: bold;
       margin-bottom: 8px;
     }
 
     .card-distance {
-      font-size: 24px; /* 거리 및 걸음 시간 확대 */
+      font-size: 24px;
       color: #555;
     }
 
@@ -200,14 +200,14 @@
     }
 
     function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
-      const R = 6371000; // 지구 반지름 (m)
+      const R = 6371000;
       const toRad = x => x * Math.PI / 180;
       const dLat = toRad(lat2 - lat1);
       const dLon = toRad(lon2 - lon1);
-      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+      const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
                 Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-                Math.sin(dLon/2) * Math.sin(dLon/2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       return R * c;
     }
 
@@ -239,7 +239,7 @@
 
           places.forEach(place => {
             const distanceKm = place.distanceMeters / 1000;
-            const walkTimeMinutes = Math.round(place.distanceMeters / 66.7); // 4km/h 걷기 기준
+            const walkTimeMinutes = Math.round(place.distanceMeters / 66.7); // 도보 약 4km/h
 
             const card = document.createElement('div');
             card.className = 'card';
