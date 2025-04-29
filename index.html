@@ -191,6 +191,14 @@
         isCurrentLocation ? 'My current location' : 'My select location';
     }
 
+    function reverseGeocode(lat, lng, callback) {
+      const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
+      fetch(url)
+        .then(response => response.json())
+        .then(data => callback(data.display_name))
+        .catch(() => callback("주소 정보를 가져올 수 없습니다."));
+    }
+
     function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
       const R = 6371;
       const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -208,13 +216,19 @@
         return;
       }
 
-      console.log("렌더링 시작:", userLat, userLng);
+      // ✅ 위치 주소 표시
+      reverseGeocode(userLat, userLng, function(address) {
+        document.getElementById('selectedLocation').textContent = address;
+      });
 
       const container = document.getElementById('places');
       container.innerHTML = '';
 
       fetch('https://raw.githubusercontent.com/9g99/foodisee/main/data/stores.json')
-        .then(response => response.json())
+        .then(response => {
+          if (!response.ok) throw new Error("fetch 실패");
+          return response.json();
+        })
         .then(data => {
           const places = data.map(place => {
             const distance = getDistanceFromLatLonInKm(userLat, userLng, place.lat, place.lng);
@@ -237,6 +251,9 @@
             `;
             container.appendChild(card);
           });
+        })
+        .catch(err => {
+          console.error("🚨 fetch 실패", err);
         });
     }
 
