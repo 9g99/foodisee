@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>Foodisee 내 주변 맛집 보기</title>
+  <title>一點一酒 내 주변 맛집 보기</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -33,13 +33,14 @@
       width: 100%;
       padding: 16px;
       box-sizing: border-box;
+      position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
       height: 480px;
       transition: box-shadow 0.2s;
     }
-    .card img {
+    .card img.main-image {
       width: 100%;
       height: 300px;
       object-fit: cover;
@@ -82,6 +83,40 @@
       display: flex;
       flex-direction: column;
     }
+    /* 순위 배지 */
+    .badge {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      overflow: hidden;
+      background-color: white;
+      border: 2px solid #ddd;
+    }
+    .badge img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    /* FOODISEE 엠블럼 */
+    .logo {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      overflow: hidden;
+      background-color: white;
+      border: 2px solid #ddd;
+    }
+    .logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
   </style>
 </head>
 <body>
@@ -92,6 +127,21 @@
   <div id="places" class="card-container"></div>
 
   <script>
+    const badgeImages = [
+      "https://source.unsplash.com/80x80/?gold-medal",    // 1위
+      "https://source.unsplash.com/80x80/?silver-medal",  // 2위
+      "https://source.unsplash.com/80x80/?bronze-medal",  // 3위
+      "https://source.unsplash.com/80x80/?award",         // 4위
+      "https://source.unsplash.com/80x80/?award",         // 5위
+      "https://source.unsplash.com/80x80/?award",         // 6위
+      "https://source.unsplash.com/80x80/?award",         // 7위
+      "https://source.unsplash.com/80x80/?award",         // 8위
+      "https://source.unsplash.com/80x80/?award",         // 9위
+      "https://source.unsplash.com/80x80/?award"          // 10위
+    ];
+
+    const foodiseeLogo = "https://source.unsplash.com/80x80/?star"; // FOODISEE 엠블럼 임시
+
     function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
       const R = 6371;
       const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -137,26 +187,37 @@
             const xml = new window.DOMParser().parseFromString(str, "text/xml");
             const placemarks = xml.getElementsByTagNameNS('*', 'Placemark');
 
-            Array.from(placemarks).slice(0, 10).forEach((pm, index) => {
+            const places = Array.from(placemarks).map(pm => {
               const name = pm.getElementsByTagNameNS('*', 'name')[0]?.textContent || "맛집";
               const coordsText = pm.getElementsByTagNameNS('*', 'coordinates')[0]?.textContent || "";
               const [lng, lat] = coordsText.trim().split(',').map(Number);
+              const distance = getDistanceFromLatLonInKm(userLat, userLng, lat, lng);
+              return { name, lat, lng, distance };
+            });
 
-              const distance = getDistanceFromLatLonInKm(userLat, userLng, lat, lng).toFixed(1);
+            // 거리순 정렬
+            places.sort((a, b) => a.distance - b.distance);
 
-              reverseGeocode(lat, lng, function(storeAddress) {
-                const imgSrc = `https://source.unsplash.com/featured/?restaurant&sig=${index}`;
-                const searchQuery = encodeURIComponent(name + ' ' + storeAddress);
+            // 최대 10개까지만 표시
+            places.slice(0, 10).forEach((place, index) => {
+              reverseGeocode(place.lat, place.lng, function(storeAddress) {
+                const searchQuery = encodeURIComponent(place.name + ' ' + storeAddress);
 
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
                   <a href="https://www.google.com/maps/search/?api=1&query=${searchQuery}" target="_blank">
-                    <img src="${imgSrc}" alt="${name}">
+                    <div class="logo">
+                      <img src="${foodiseeLogo}" alt="FOODISEE 인증">
+                    </div>
+                    <div class="badge">
+                      <img src="${badgeImages[index]}" alt="순위 배지">
+                    </div>
+                    <img class="main-image" src="https://source.unsplash.com/800x600/?restaurant&sig=${index}" alt="${place.name}">
                     <div class="card-content">
-                      <div class="card-title">${name}</div>
+                      <div class="card-title">${place.name}</div>
                       <div class="card-address">${storeAddress}</div>
-                      <div class="card-distance">${distance} km 거리</div>
+                      <div class="card-distance">${place.distance.toFixed(1)} km 거리</div>
                     </div>
                   </a>
                 `;
