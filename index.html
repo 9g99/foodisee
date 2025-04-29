@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>一點一酒 내 주변 맛집 보기</title>
+  <title>FireBall Guide</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -13,29 +13,20 @@
 
     /* 제목 영역 */
     .title-container {
-      text-align: center;
       margin-top: 40px;
       margin-bottom: 32px;
-    }
-    .title-badge {
-      display: inline-block;
-      background-color: #e0f7fa;
-      color: blue;
-      border-radius: 12px;
-      padding: 8px 16px;
-      font-size: 2rem;
-      font-weight: bold;
-      margin-bottom: 48px;
     }
     .title-main {
       font-size: 3.5rem;
       font-weight: bold;
-      margin-bottom: 48px;
+      margin-bottom: 24px;
       line-height: 1.2;
+      text-align: left; /* 좌측 정렬 */
     }
     .title-sub {
       font-size: 2.5rem;
       color: #555;
+      text-align: left; /* 좌측 정렬 */
       line-height: 1.4;
     }
 
@@ -132,9 +123,12 @@
 
 <body>
   <div class="title-container">
-    <div class="title-badge">一點一酒</div>
-    <div class="title-main">한 점에 한 잔씩<br>제대로 맛있게</div>
-    <div class="title-sub">내 주변에 FireBall 선정 맛집 보기</div>
+    <div class="title-main">
+      FireBall <span style="color: red;">Guide</span>
+    </div>
+    <div class="title-sub">
+      My current location
+    </div>
   </div>
 
   <div class="search-container">
@@ -241,7 +235,6 @@
         });
     }
 
-    // 초기 위치 자동 탐색
     navigator.geolocation.getCurrentPosition(function(position) {
       renderPlaces(position.coords.latitude, position.coords.longitude);
     }, function(error) {
