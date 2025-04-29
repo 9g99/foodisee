@@ -12,8 +12,6 @@
     }
 
     .wrapper {
-      max-width: 1200px;
-      margin: 0 auto;
       padding: 0 32px;
     }
 
@@ -97,21 +95,11 @@
       display: block;
     }
 
-    .map-container {
-      margin-bottom: 32px;
-    }
-
-    iframe {
-      width: 100%;
-      height: 600px;
-      border: 0;
-    }
-
     .card-container {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 24px;
-      margin: 0 32px;
+      padding: 0 32px;
     }
 
     .card {
@@ -121,6 +109,7 @@
       width: 100%;
       padding: 16px;
       box-sizing: border-box;
+      position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -170,24 +159,25 @@
 <body>
   <div class="wrapper">
     <div class="title-container">
-      <div class="title-main">FireBall <span style="color: red;">Guide2</span></div>
+      <div class="title-main">
+        FireBall <span style="color: red;">Guide 1.0</span>
+      </div>
       <div class="title-sub" id="locationTitle">My current location</div>
       <div id="selectedLocation" class="selected-location"></div>
+    </div>
 
-      <div class="search-container">
-        <input type="text" id="locationInput" placeholder="지역 또는 주소를 검색하세요" />
-        <div class="button-group">
-          <button onclick="searchLocation()">검색</button>
-          <button onclick="refreshLocation()">
-            <img src="https://9g99.github.io/foodisee/refresh.png" alt="새로고침" />
-          </button>
-        </div>
-      </div>
-
-      <div class="map-container">
-        <iframe id="mapFrame" src="" allowfullscreen loading="lazy"></iframe>
+    <div class="search-container">
+      <input type="text" id="locationInput" placeholder="지역 또는 주소를 검색하세요" />
+      <div class="button-group">
+        <button onclick="searchLocation()">검색</button>
+        <button onclick="refreshLocation()">
+          <img src="https://9g99.github.io/foodisee/refresh.png" alt="새로고침" />
+        </button>
       </div>
     </div>
+
+    <iframe src="https://www.google.com/maps/d/u/0/embed?mid=1g6Nlmx4DX38L0t0UAZnNQVd9aRd9trw&ehbc=2E312F"
+            width="100%" height="600" style="border:0; margin-bottom: 24px;" allowfullscreen="" loading="lazy"></iframe>
   </div>
 
   <div id="places" class="card-container"></div>
@@ -198,7 +188,7 @@
 
     function updateLocationTitle() {
       document.getElementById('locationTitle').textContent =
-        isCurrentLocation ? 'My current location' : 'My selected location';
+        isCurrentLocation ? 'My current location' : 'My select location';
     }
 
     function reverseGeocode(lat, lng, callback) {
@@ -221,14 +211,9 @@
       return R * c;
     }
 
-    function updateMap(lat, lng) {
-      const iframe = document.getElementById('mapFrame');
-      iframe.src = `https://www.google.com/maps?q=${lat},${lng}&z=15&output=embed`;
-    }
-
     function renderPlacesFromJSON() {
-      if (typeof userLat !== 'number' || typeof userLng !== 'number') {
-        alert("정확한 위치 정보를 가져오지 못해 음식점을 표시할 수 없습니다.");
+      if (typeof userLat === 'undefined' || typeof userLng === 'undefined') {
+        alert("위치 정보가 설정되지 않아 음식점을 표시할 수 없습니다.");
         return;
       }
 
@@ -236,13 +221,14 @@
         document.getElementById('selectedLocation').textContent = address;
       });
 
-      updateMap(userLat, userLng);
-
       const container = document.getElementById('places');
       container.innerHTML = '';
 
       fetch('https://raw.githubusercontent.com/9g99/foodisee/main/data/stores.json')
-        .then(response => response.json())
+        .then(response => {
+          if (!response.ok) throw new Error("fetch 실패");
+          return response.json();
+        })
         .then(data => {
           const places = data.map(place => {
             const distanceMeters = getDistanceFromLatLonInMeters(userLat, userLng, place.lat, place.lng);
@@ -253,7 +239,7 @@
 
           places.forEach(place => {
             const distanceKm = place.distanceMeters / 1000;
-            const walkTime = Math.round(place.distanceMeters / 67);
+            const walkTimeMinutes = Math.round(place.distanceMeters / 66.7);
 
             const card = document.createElement('div');
             card.className = 'card';
@@ -262,7 +248,7 @@
                 <img class="main-image" src="${place.image}" alt="${place.name}">
                 <div class="card-content">
                   <div class="card-title">${place.name}</div>
-                  <div class="card-distance">${distanceKm.toFixed(1)} km 거리 · 걸어서 ${walkTime}분</div>
+                  <div class="card-distance">${distanceKm.toFixed(1)} km 거리 · 걸어서 ${walkTimeMinutes}분</div>
                 </div>
               </a>
             `;
@@ -270,13 +256,12 @@
           });
         })
         .catch(err => {
-          console.error("fetch 오류:", err);
-          alert("음식점 정보를 불러오는 데 실패했습니다.");
+          console.error("🚨 fetch 실패", err);
         });
     }
 
     function searchLocation() {
-      const query = document.getElementById('locationInput').value.trim();
+      const query = document.getElementById('locationInput').value;
       if (!query) return alert("검색어를 입력해주세요.");
 
       const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`;
@@ -287,33 +272,32 @@
             alert("검색 결과가 없습니다.");
             return;
           }
+
           const lat = parseFloat(results[0].lat);
           const lon = parseFloat(results[0].lon);
+
           userLat = lat;
           userLng = lon;
           isCurrentLocation = false;
+
           updateLocationTitle();
           renderPlacesFromJSON();
-        })
-        .catch(err => {
-          console.error("검색 오류:", err);
-          alert("검색 도중 오류가 발생했습니다.");
         });
     }
 
     function refreshLocation() {
+      // 위치 권한 오류 방지를 위한 테스트용 좌표
       isCurrentLocation = true;
-      document.getElementById('locationInput').value = "";
-      document.getElementById('locationInput').placeholder = "지역 또는 주소를 검색하세요";
+      const input = document.getElementById('locationInput');
+      input.value = "";
+      input.placeholder = "지역 또는 주소를 검색하세요";
 
-      navigator.geolocation.getCurrentPosition(function(position) {
-        userLat = position.coords.latitude;
-        userLng = position.coords.longitude;
-        updateLocationTitle();
-        renderPlacesFromJSON();
-      }, function(error) {
-        alert('위치 정보를 가져올 수 없습니다. 서비스를 이용할 수 없습니다.');
-      });
+      // 영등포역 근처 좌표
+      userLat = 37.5157;
+      userLng = 126.9074;
+
+      updateLocationTitle();
+      renderPlacesFromJSON();
     }
 
     navigator.geolocation.getCurrentPosition(function(position) {
@@ -321,7 +305,9 @@
       userLng = position.coords.longitude;
       renderPlacesFromJSON();
     }, function(error) {
-      alert('위치 정보를 가져올 수 없습니다. 서비스를 이용할 수 없습니다.');
+      // 오류 시 fallback
+      console.warn("Geolocation 접근 실패, 임시 좌표 사용");
+      refreshLocation();
     });
   </script>
 </body>
