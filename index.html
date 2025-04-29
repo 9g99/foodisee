@@ -23,7 +23,7 @@
     }
     @media (min-width: 768px) {
       .card-container {
-        grid-template-columns: 1fr; /* 항상 1개만 가로로 */
+        grid-template-columns: 1fr; /* 항상 1개만 세로 배치 */
       }
     }
     .card {
@@ -37,7 +37,7 @@
       flex-direction: column;
       align-items: center;
       transition: box-shadow 0.2s;
-      height: 480px; /* 기본 카드(음식점 카드) 크기 */
+      height: 480px; /* 음식점 카드 기본 높이 */
     }
     .card img {
       width: 100%;
@@ -47,17 +47,23 @@
       margin-bottom: 12px;
     }
 
-    /* 내 현재 위치 카드 전용 스타일 */
+    /* 내 현재 위치 카드 */
     .card.my-location {
-      height: 200px; /* 내 현재 위치 카드 높이 줄임 */
+      height: 200px;
     }
     .card.my-location img {
-      display: none; /* 내 현재 위치 카드는 이미지 숨김 */
+      display: none;
     }
 
     .card-title {
       font-size: 24px;
       font-weight: bold;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    .card-address {
+      font-size: 14px;
+      color: #777;
       margin-bottom: 8px;
       text-align: center;
     }
@@ -112,7 +118,7 @@
         const container = document.getElementById('places');
 
         const myCard = document.createElement('div');
-        myCard.className = 'card my-location'; // ★ 내 위치 카드는 별도 클래스 추가
+        myCard.className = 'card my-location';
         myCard.innerHTML = `
           <div class="card-title">내 현재 위치</div>
           <div class="card-distance">${address}</div>
@@ -133,16 +139,20 @@
 
               const distance = getDistanceFromLatLonInKm(userLat, userLng, lat, lng).toFixed(1);
 
-              const card = document.createElement('div');
-              card.className = 'card'; // ★ 음식점 카드는 기본 card 클래스만
-              card.innerHTML = `
-                <a href="https://maps.google.com/?q=${lat},${lng}" target="_blank">
-                  <img src="https://source.unsplash.com/featured/?food,restaurant" alt="${name}">
-                  <div class="card-title">${name}</div>
-                  <div class="card-distance">${distance} km 거리</div>
-                </a>
-              `;
-              container.appendChild(card);
+              // 음식점 좌표 기반으로 주소 가져오기
+              reverseGeocode(lat, lng, function(storeAddress) {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                  <a href="https://maps.google.com/?q=${lat},${lng}" target="_blank">
+                    <img src="https://source.unsplash.com/featured/?food,restaurant" alt="${name}">
+                    <div class="card-title">${name}</div>
+                    <div class="card-address">${storeAddress}</div>
+                    <div class="card-distance">${distance} km 거리</div>
+                  </a>
+                `;
+                container.appendChild(card);
+              });
             });
           })
           .catch(error => {
