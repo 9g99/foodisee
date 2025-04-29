@@ -96,7 +96,7 @@
       display: grid;
       grid-template-columns: 1fr;
       gap: 24px;
-      padding: 0 32px; /* 음식점 카드 좌우 32px로 확대 */
+      padding: 0 32px;
     }
 
     .card {
@@ -187,6 +187,7 @@
 
   <script>
     let isCurrentLocation = true;
+    let userLat, userLng;
 
     function updateLocationTitle() {
       document.getElementById('locationTitle').textContent =
@@ -204,58 +205,33 @@
       return R * c;
     }
 
-    function reverseGeocode(lat, lng, callback) {
-      const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
-      fetch(url)
-        .then(response => response.json())
-        .then(data => callback(data.display_name))
-        .catch(() => callback("주소 정보를 가져올 수 없습니다."));
-    }
-
-    function renderPlaces(userLat, userLng) {
+    function renderPlacesFromJSON() {
       const container = document.getElementById('places');
       container.innerHTML = '';
 
-      reverseGeocode(userLat, userLng, function(address) {
-        document.getElementById('selectedLocation').textContent = address;
-      });
-
-      updateLocationTitle();
-
-      fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://9g99.github.io/foodisee/foodisee.xml'))
+      fetch('https://raw.githubusercontent.com/9g99/foodisee/main/data/stores.json')
         .then(response => response.json())
         .then(data => {
-          const str = data.contents;
-          const xml = new window.DOMParser().parseFromString(str, "text/xml");
-          const placemarks = xml.getElementsByTagNameNS('*', 'Placemark');
-
-          const places = Array.from(placemarks).map(pm => {
-            const name = pm.getElementsByTagNameNS('*', 'name')[0]?.textContent || "맛집";
-            const coordsText = pm.getElementsByTagNameNS('*', 'coordinates')[0]?.textContent || "";
-            const [lng, latP] = coordsText.trim().split(',').map(Number);
-            const distance = getDistanceFromLatLonInKm(userLat, userLng, latP, lng);
-            return { name, lat: latP, lng, distance };
+          const places = data.map(place => {
+            const distance = getDistanceFromLatLonInKm(userLat, userLng, place.lat, place.lng);
+            return { ...place, distance };
           });
 
           places.sort((a, b) => a.distance - b.distance);
 
-          places.slice(0, 10).forEach((place, index) => {
-            reverseGeocode(place.lat, place.lng, function(storeAddress) {
-              const searchQuery = encodeURIComponent(place.name + ' ' + storeAddress);
-              const card = document.createElement('div');
-              card.className = 'card';
-              card.innerHTML = `
-                <a href="https://www.google.com/maps/search/?api=1&query=${searchQuery}" target="_blank">
-                  <img class="main-image" src="https://raw.githubusercontent.com/9g99/foodisee/main/IMG_2875.png" alt="${place.name}">
-                  <div class="card-content">
-                    <div class="card-title">${place.name}</div>
-                    <div class="card-address">${storeAddress}</div>
-                    <div class="card-distance">${place.distance.toFixed(1)} km 거리</div>
-                  </div>
-                </a>
-              `;
-              container.appendChild(card);
-            });
+          places.forEach((place) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+              <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name)}" target="_blank">
+                <img class="main-image" src="${place.image}" alt="${place.name}">
+                <div class="card-content">
+                  <div class="card-title">${place.name}</div>
+                  <div class="card-distance">${place.distance.toFixed(1)} km 거리</div>
+                </div>
+              </a>
+            `;
+            container.appendChild(card);
           });
         });
     }
@@ -276,7 +252,10 @@
           const lat = parseFloat(results[0].lat);
           const lon = parseFloat(results[0].lon);
           isCurrentLocation = false;
-          renderPlaces(lat, lon);
+          userLat = lat;
+          userLng = lon;
+          updateLocationTitle();
+          renderPlacesFromJSON();
         });
     }
 
@@ -286,18 +265,22 @@
       input.value = "";
       input.placeholder = "지역 또는 주소를 검색하세요";
       navigator.geolocation.getCurrentPosition(function(position) {
-        renderPlaces(position.coords.latitude, position.coords.longitude);
+        userLat = position.coords.latitude;
+        userLng = position.coords.longitude;
+        updateLocationTitle();
+        renderPlacesFromJSON();
       }, function(error) {
         alert('위치 정보 접근이 거부되었습니다.');
       });
     }
 
     navigator.geolocation.getCurrentPosition(function(position) {
-      renderPlaces(position.coords.latitude, position.coords.longitude);
+      userLat = position.coords.latitude;
+      userLng = position.coords.longitude;
+      renderPlacesFromJSON();
     }, function(error) {
       alert('위치 정보 접근이 거부되었습니다. 검색창을 이용해주세요.');
     });
   </script>
 </body>
 </html>
-
