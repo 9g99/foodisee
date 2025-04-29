@@ -11,7 +11,6 @@
       padding: 20px;
     }
 
-    /* 제목 영역 */
     .title-container {
       margin-top: 40px;
       margin-bottom: 32px;
@@ -37,7 +36,6 @@
       text-align: left;
     }
 
-    /* 검색 영역 */
     .search-container {
       display: flex;
       justify-content: flex-start;
@@ -52,20 +50,25 @@
       font-size: 2rem;
       padding: 20px;
       border: 1px solid #ccc;
-      border-radius: 9999px; /* 완전 둥글게 */
+      border-radius: 9999px;
       outline: none;
     }
     .search-container button {
       font-size: 2rem;
       padding: 20px 24px;
       border: 1px solid #ccc;
-      border-radius: 9999px; /* 완전 둥글게 */
-      background-color: #007bff;
-      color: white;
+      border-radius: 9999px;
       cursor: pointer;
     }
+    .search-container button:nth-child(2) {
+      background-color: #007bff;
+      color: white;
+    }
+    .search-container button:nth-child(3) {
+      background-color: #28a745;
+      color: white;
+    }
 
-    /* 카드 영역 */
     .card-container {
       display: grid;
       grid-template-columns: 1fr;
@@ -127,30 +130,33 @@
 </head>
 
 <body>
-  <!-- 제목 영역 -->
   <div class="title-container">
     <div class="title-main">
       FireBall <span style="color: red;">Guide</span>
     </div>
-    <div class="title-sub">
-      My current location
-    </div>
+    <div class="title-sub" id="locationTitle">My current location</div>
     <div id="selectedLocation" class="selected-location"></div>
   </div>
 
-  <!-- 검색 영역 -->
   <div class="search-container">
     <input type="text" id="locationInput" placeholder="지역 또는 주소를 검색하세요" />
     <button onclick="searchLocation()">검색</button>
+    <button onclick="refreshLocation()">🔄</button>
   </div>
 
-  <!-- 지도 영역 -->
-  <iframe src="https://www.google.com/maps/d/u/0/embed?mid=1g6Nlmx4DX38L0t0UAZnNQVd9aRd9trw&ehbc=2E312F" width="100%" height="600" style="border:0; margin-bottom: 24px;" allowfullscreen="" loading="lazy"></iframe>
+  <iframe src="https://www.google.com/maps/d/u/0/embed?mid=1g6Nlmx4DX38L0t0UAZnNQVd9aRd9trw&ehbc=2E312F"
+          width="100%" height="600" style="border:0; margin-bottom: 24px;" allowfullscreen="" loading="lazy"></iframe>
 
-  <!-- 음식점 카드 영역 -->
   <div id="places" class="card-container"></div>
 
   <script>
+    let isCurrentLocation = true;
+
+    function updateLocationTitle() {
+      document.getElementById('locationTitle').textContent =
+        isCurrentLocation ? 'My current location' : 'My select location';
+    }
+
     function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
       const R = 6371;
       const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -166,12 +172,8 @@
       const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
       fetch(url)
         .then(response => response.json())
-        .then(data => {
-          callback(data.display_name);
-        })
-        .catch(() => {
-          callback("주소 정보를 가져올 수 없습니다.");
-        });
+        .then(data => callback(data.display_name))
+        .catch(() => callback("주소 정보를 가져올 수 없습니다."));
     }
 
     function renderPlaces(userLat, userLng) {
@@ -181,6 +183,8 @@
       reverseGeocode(userLat, userLng, function(address) {
         document.getElementById('selectedLocation').textContent = address;
       });
+
+      updateLocationTitle();
 
       fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://9g99.github.io/foodisee/foodisee.xml'))
         .then(response => response.json())
@@ -235,10 +239,21 @@
           }
           const lat = parseFloat(results[0].lat);
           const lon = parseFloat(results[0].lon);
+          isCurrentLocation = false;
           renderPlaces(lat, lon);
         });
     }
 
+    function refreshLocation() {
+      isCurrentLocation = true;
+      navigator.geolocation.getCurrentPosition(function(position) {
+        renderPlaces(position.coords.latitude, position.coords.longitude);
+      }, function(error) {
+        alert('위치 정보 접근이 거부되었습니다.');
+      });
+    }
+
+    // 초기 진입 시 현재 위치 설정
     navigator.geolocation.getCurrentPosition(function(position) {
       renderPlaces(position.coords.latitude, position.coords.longitude);
     }, function(error) {
