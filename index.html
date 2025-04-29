@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>FireBall Guide</title>
   <style>
     body {
@@ -19,7 +19,6 @@
       margin-top: 40px;
       margin-bottom: 32px;
     }
-
     .title-main {
       font-size: 3.5rem;
       font-weight: bold;
@@ -27,7 +26,6 @@
       line-height: 1.2;
       text-align: left;
     }
-
     .title-sub {
       font-size: 2.5rem;
       color: #555;
@@ -35,13 +33,70 @@
       margin-top: 24px;
       line-height: 1.4;
     }
+    .selected-location {
+      font-size: 1.5rem;
+      color: #333;
+      margin-top: 16px;
+      text-align: left;
+    }
+
+    .search-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 24px;
+      margin-bottom: 32px;
+      gap: 16px;
+    }
+
+    #locationInput {
+      flex-grow: 1;
+      font-size: 2rem;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 9999px;
+      outline: none;
+      margin-right: 12px;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .button-group button {
+      font-size: 2rem;
+      border-radius: 9999px;
+      cursor: pointer;
+    }
+
+    .button-group button:first-child {
+      padding: 20px 24px;
+      border: 1px solid #ccc;
+      background-color: #007bff;
+      color: white;
+    }
+
+    .button-group button:last-child {
+      background: none;
+      border: none;
+      padding: 0;
+    }
+
+    .button-group img {
+      height: 40px;
+      width: 40px;
+      margin-left: 12px;
+      margin-right: 4px;
+      display: block;
+    }
 
     .card-container {
       display: grid;
       grid-template-columns: 1fr;
       gap: 24px;
-      padding: 0 32px;
-      margin-bottom: 48px;
+      padding: 0 32px; /* 음식점 카드 좌우 32px로 확대 */
     }
 
     .card {
@@ -59,13 +114,13 @@
       transition: box-shadow 0.2s;
     }
 
-    .main-image {
+    .card img.main-image {
       width: 100%;
       height: 300px;
       object-fit: contain;
+      background-color: white;
       border-radius: 8px;
       margin-bottom: 12px;
-      background: white;
     }
 
     .card-content {
@@ -82,12 +137,28 @@
       margin-bottom: 8px;
     }
 
+    .card-address {
+      font-size: 14px;
+      color: #777;
+      margin-bottom: 8px;
+    }
+
     .card-distance {
       font-size: 16px;
       color: #555;
     }
+
+    .card a {
+      text-decoration: none;
+      color: inherit;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
   </style>
 </head>
+
 <body>
   <div class="wrapper">
     <div class="title-container">
@@ -95,81 +166,138 @@
         FireBall <span style="color: red;">Guide</span>
       </div>
       <div class="title-sub" id="locationTitle">My current location</div>
+      <div id="selectedLocation" class="selected-location"></div>
     </div>
+
+    <div class="search-container">
+      <input type="text" id="locationInput" placeholder="지역 또는 주소를 검색하세요" />
+      <div class="button-group">
+        <button onclick="searchLocation()">검색</button>
+        <button onclick="refreshLocation()">
+          <img src="https://9g99.github.io/foodisee/refresh.png" alt="새로고침" />
+        </button>
+      </div>
+    </div>
+
+    <iframe src="https://www.google.com/maps/d/u/0/embed?mid=1g6Nlmx4DX38L0t0UAZnNQVd9aRd9trw&ehbc=2E312F"
+            width="100%" height="600" style="border:0; margin-bottom: 24px;" allowfullscreen="" loading="lazy"></iframe>
   </div>
 
   <div id="places" class="card-container"></div>
 
   <script>
-    let userLat, userLng;
+    let isCurrentLocation = true;
+
+    function updateLocationTitle() {
+      document.getElementById('locationTitle').textContent =
+        isCurrentLocation ? 'My current location' : 'My select location';
+    }
 
     function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
       const R = 6371;
       const dLat = (lat2 - lat1) * Math.PI / 180;
       const dLon = (lon2 - lon1) * Math.PI / 180;
-      const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(lat1 * Math.PI / 180) *
-          Math.cos(lat2 * Math.PI / 180) *
-          Math.sin(dLon / 2) * Math.sin(dLon / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
       return R * c;
     }
 
-    function renderPlacesFromJSON() {
-      fetch(
-        "https://raw.githubusercontent.com/9g99/foodisee/main/data/stores.json"
-      )
-        .then((response) => response.json())
-        .then((data) => {
-          const container = document.getElementById("places");
-          container.innerHTML = "";
+    function reverseGeocode(lat, lng, callback) {
+      const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
+      fetch(url)
+        .then(response => response.json())
+        .then(data => callback(data.display_name))
+        .catch(() => callback("주소 정보를 가져올 수 없습니다."));
+    }
 
-          const places = data.map((place) => {
-            const distance = getDistanceFromLatLonInKm(
-              userLat,
-              userLng,
-              place.lat,
-              place.lng
-            );
-            return { ...place, distance };
+    function renderPlaces(userLat, userLng) {
+      const container = document.getElementById('places');
+      container.innerHTML = '';
+
+      reverseGeocode(userLat, userLng, function(address) {
+        document.getElementById('selectedLocation').textContent = address;
+      });
+
+      updateLocationTitle();
+
+      fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://9g99.github.io/foodisee/foodisee.xml'))
+        .then(response => response.json())
+        .then(data => {
+          const str = data.contents;
+          const xml = new window.DOMParser().parseFromString(str, "text/xml");
+          const placemarks = xml.getElementsByTagNameNS('*', 'Placemark');
+
+          const places = Array.from(placemarks).map(pm => {
+            const name = pm.getElementsByTagNameNS('*', 'name')[0]?.textContent || "맛집";
+            const coordsText = pm.getElementsByTagNameNS('*', 'coordinates')[0]?.textContent || "";
+            const [lng, latP] = coordsText.trim().split(',').map(Number);
+            const distance = getDistanceFromLatLonInKm(userLat, userLng, latP, lng);
+            return { name, lat: latP, lng, distance };
           });
 
           places.sort((a, b) => a.distance - b.distance);
 
-          places.forEach((place) => {
-            const card = document.createElement("div");
-            card.className = "card";
-            card.innerHTML = `
-              <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                place.name
-              )}" target="_blank">
-                <img class="main-image" src="${place.image}" alt="${
-              place.name
-            }" />
-                <div class="card-content">
-                  <div class="card-title">${place.name}</div>
-                  <div class="card-distance">${place.distance.toFixed(
-                    1
-                  )} km 거리</div>
-                </div>
-              </a>
-            `;
-            container.appendChild(card);
+          places.slice(0, 10).forEach((place, index) => {
+            reverseGeocode(place.lat, place.lng, function(storeAddress) {
+              const searchQuery = encodeURIComponent(place.name + ' ' + storeAddress);
+              const card = document.createElement('div');
+              card.className = 'card';
+              card.innerHTML = `
+                <a href="https://www.google.com/maps/search/?api=1&query=${searchQuery}" target="_blank">
+                  <img class="main-image" src="https://raw.githubusercontent.com/9g99/foodisee/main/IMG_2875.png" alt="${place.name}">
+                  <div class="card-content">
+                    <div class="card-title">${place.name}</div>
+                    <div class="card-address">${storeAddress}</div>
+                    <div class="card-distance">${place.distance.toFixed(1)} km 거리</div>
+                  </div>
+                </a>
+              `;
+              container.appendChild(card);
+            });
           });
         });
     }
 
-    navigator.geolocation.getCurrentPosition(
-      function (position) {
-        userLat = position.coords.latitude;
-        userLng = position.coords.longitude;
-        renderPlacesFromJSON();
-      },
-      function (error) {
-        alert("위치 정보를 가져올 수 없습니다.");
-      }
-    );
+    function searchLocation() {
+      const query = document.getElementById('locationInput').value;
+      if (!query) return alert("검색어를 입력해주세요.");
+
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`;
+
+      fetch(url)
+        .then(response => response.json())
+        .then(results => {
+          if (results.length === 0) {
+            alert("검색 결과가 없습니다.");
+            return;
+          }
+          const lat = parseFloat(results[0].lat);
+          const lon = parseFloat(results[0].lon);
+          isCurrentLocation = false;
+          renderPlaces(lat, lon);
+        });
+    }
+
+    function refreshLocation() {
+      isCurrentLocation = true;
+      const input = document.getElementById('locationInput');
+      input.value = "";
+      input.placeholder = "지역 또는 주소를 검색하세요";
+      navigator.geolocation.getCurrentPosition(function(position) {
+        renderPlaces(position.coords.latitude, position.coords.longitude);
+      }, function(error) {
+        alert('위치 정보 접근이 거부되었습니다.');
+      });
+    }
+
+    navigator.geolocation.getCurrentPosition(function(position) {
+      renderPlaces(position.coords.latitude, position.coords.longitude);
+    }, function(error) {
+      alert('위치 정보 접근이 거부되었습니다. 검색창을 이용해주세요.');
+    });
   </script>
 </body>
 </html>
+
