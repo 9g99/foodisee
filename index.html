@@ -202,17 +202,13 @@
     function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
       const R = 6371000; // 지구 반지름 (m)
       const toRad = x => x * Math.PI / 180;
-
       const dLat = toRad(lat2 - lat1);
       const dLon = toRad(lon2 - lon1);
-
       const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
                 Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
                 Math.sin(dLon/2) * Math.sin(dLon/2);
-
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      const distance = R * c;
-      return distance; // 단위: meter
+      return R * c;
     }
 
     function renderPlacesFromJSON() {
@@ -243,7 +239,7 @@
 
           places.forEach(place => {
             const distanceKm = place.distanceMeters / 1000;
-            const walkTimeMinutes = Math.round(place.distanceMeters / 66.7); // 4km/h 기준
+            const walkTimeMinutes = Math.round(place.distanceMeters / 66.7); // 4km/h 걷기 기준
 
             const card = document.createElement('div');
             card.className = 'card';
