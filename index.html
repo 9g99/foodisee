@@ -109,7 +109,7 @@
         container.appendChild(myCard);
 
         // ★★★ AllOrigins 프록시 사용 fetch ★★★
-        fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://9g99.github.io/foodisee/foodisee.kml'))
+        fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://9g99.github.io/foodisee/foodisee.xml'))
           .then(response => response.json())
           .then(data => {
             const str = data.contents; // allorigins는 contents 안에 원본 데이터 있음
