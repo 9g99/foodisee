@@ -20,12 +20,30 @@
       margin-bottom: 32px;
     }
 
+    .title-main-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
     .title-main {
       font-size: 3.5rem;
       font-weight: bold;
       margin-bottom: 24px;
       line-height: 1.2;
       text-align: left;
+    }
+
+    .logo-image {
+      height: 64px;
+      object-fit: contain;
+      margin-left: 20px;
+    }
+
+    @media (max-width: 600px) {
+      .logo-image {
+        height: 40px;
+      }
     }
 
     .title-sub {
@@ -159,8 +177,11 @@
 <body>
   <div class="wrapper">
     <div class="title-container">
-      <div class="title-main">
-        FireBall <span style="color: red;">Guide 1.0</span>
+      <div class="title-main-wrapper">
+        <div class="title-main">
+          FireBall <span style="color: red;">Guide 1.1</span>
+        </div>
+        <img src="https://raw.githubusercontent.com/9g99/foodisee/refs/heads/main/IMG_2875.png" alt="FireBall Logo" class="logo-image" />
       </div>
       <div class="title-sub" id="locationTitle">My current location</div>
       <div id="selectedLocation" class="selected-location"></div>
@@ -286,13 +307,11 @@
     }
 
     function refreshLocation() {
-      // 위치 권한 오류 방지를 위한 테스트용 좌표
       isCurrentLocation = true;
       const input = document.getElementById('locationInput');
       input.value = "";
       input.placeholder = "지역 또는 주소를 검색하세요";
 
-      // 영등포역 근처 좌표
       userLat = 37.5157;
       userLng = 126.9074;
 
@@ -305,7 +324,6 @@
       userLng = position.coords.longitude;
       renderPlacesFromJSON();
     }, function(error) {
-      // 오류 시 fallback
       console.warn("Geolocation 접근 실패, 임시 좌표 사용");
       refreshLocation();
     });
