@@ -108,12 +108,22 @@
         `;
         container.appendChild(myCard);
 
-        // ★★★ CORS 우회 프록시 사용 fetch ★★★
+        // ★★★ 디버깅용 fetch (thingproxy 사용) ★★★
         fetch('https://thingproxy.freeboard.io/fetch/https://9g99.github.io/foodisee-real.kml')
-          .then(response => response.text())
-          .then(str => (new window.DOMParser()).parseFromString(str, "text/xml"))
+          .then(response => {
+            console.log('✅ fetch 응답 상태:', response.status);
+            return response.text();
+          })
+          .then(str => {
+            console.log('✅ 받아온 KML 데이터 일부:', str.slice(0, 500));
+            const xml = new window.DOMParser().parseFromString(str, "text/xml");
+            console.log('✅ XML 파싱 완료:', xml);
+            return xml;
+          })
           .then(data => {
-            const placemarks = data.getElementsByTagNameNS('*', 'Placemark'); // 네임스페이스 무시
+            const placemarks = data.getElementsByTagNameNS('*', 'Placemark');
+            console.log('✅ Placemark 개수:', placemarks.length);
+
             Array.from(placemarks).forEach(pm => {
               const name = pm.getElementsByTagNameNS('*', 'name')[0]?.textContent || "맛집";
               const coordsText = pm.getElementsByTagNameNS('*', 'coordinates')[0]?.textContent || "";
@@ -134,7 +144,7 @@
             });
           })
           .catch(error => {
-            console.error('맛집 데이터 로딩 실패:', error);
+            console.error('❌ fetch 실패:', error);
           });
       });
 
