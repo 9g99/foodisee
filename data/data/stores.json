@@ -1,10 +1,44 @@
 [
   {
     "name": "궁전백반",
-    "lat": 37.123456,
-    "lng": 127.123456,
+    "lat": 37.5512,
+    "lng": 126.9723,
     "image": "https://raw.githubusercontent.com/9g99/foodisee/main/img/gungjeon.png"
   },
-  ...
+  {
+    "name": "뽕씨네얼큰수제비",
+    "lat": 37.5550,
+    "lng": 126.9801,
+    "image": "https://raw.githubusercontent.com/9g99/foodisee/main/img/bbongcine_spicy_sujebi.png"
+  },
+  {
+    "name": "서도냉면",
+    "lat": 37.5565,
+    "lng": 126.9678,
+    "image": "https://raw.githubusercontent.com/9g99/foodisee/main/img/seodo_naengmyeon.png"
+  },
+  {
+    "name": "오복순대국",
+    "lat": 37.5581,
+    "lng": 126.9752,
+    "image": "https://raw.githubusercontent.com/9g99/foodisee/main/img/obok_sundaeguk.png"
+  },
+  {
+    "name": "완산골",
+    "lat": 37.5599,
+    "lng": 126.9735,
+    "image": "https://raw.githubusercontent.com/9g99/foodisee/main/img/wansangol.png"
+  },
+  {
+    "name": "창평본가",
+    "lat": 37.5606,
+    "lng": 126.9702,
+    "image": "https://raw.githubusercontent.com/9g99/foodisee/main/img/changpyeong_bonga.png"
+  },
+  {
+    "name": "함흥냉면",
+    "lat": 37.5623,
+    "lng": 126.9779,
+    "image": "https://raw.githubusercontent.com/9g99/foodisee/main/img/hamheung_naengmyeon.png"
+  }
 ]
-
