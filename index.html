@@ -155,13 +155,10 @@
     }
   </style>
 </head>
-
 <body>
   <div class="wrapper">
     <div class="title-container">
-      <div class="title-main">
-        FireBall <span style="color: red;">Guide</span>
-      </div>
+      <div class="title-main">FireBall <span style="color: red;">Guide</span></div>
       <div class="title-sub" id="locationTitle">My current location</div>
       <div id="selectedLocation" class="selected-location"></div>
     </div>
@@ -225,10 +222,7 @@
       container.innerHTML = '';
 
       fetch('https://raw.githubusercontent.com/9g99/foodisee/main/data/stores.json')
-        .then(response => {
-          if (!response.ok) throw new Error("fetch 실패");
-          return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
           const places = data.map(place => {
             const distanceMeters = getDistanceFromLatLonInMeters(userLat, userLng, place.lat, place.lng);
@@ -239,7 +233,7 @@
 
           places.forEach(place => {
             const distanceKm = place.distanceMeters / 1000;
-            const walkTimeMinutes = Math.round(place.distanceMeters / 66.7); // 도보 약 4km/h
+            const walkTime = Math.round(place.distanceMeters / 67); // 평균 속도 0.9m/s
 
             const card = document.createElement('div');
             card.className = 'card';
@@ -248,16 +242,14 @@
                 <img class="main-image" src="${place.image}" alt="${place.name}">
                 <div class="card-content">
                   <div class="card-title">${place.name}</div>
-                  <div class="card-distance">${distanceKm.toFixed(1)} km 거리 · 걸어서 ${walkTimeMinutes}분</div>
+                  <div class="card-distance">${distanceKm.toFixed(1)} km 거리 · 걸어서 ${walkTime}분</div>
                 </div>
               </a>
             `;
             container.appendChild(card);
           });
         })
-        .catch(err => {
-          console.error("🚨 fetch 실패", err);
-        });
+        .catch(err => console.error("fetch 오류:", err));
     }
 
     function searchLocation() {
@@ -272,14 +264,11 @@
             alert("검색 결과가 없습니다.");
             return;
           }
-
           const lat = parseFloat(results[0].lat);
           const lon = parseFloat(results[0].lon);
-
           userLat = lat;
           userLng = lon;
           isCurrentLocation = false;
-
           updateLocationTitle();
           renderPlacesFromJSON();
         });
@@ -287,16 +276,15 @@
 
     function refreshLocation() {
       isCurrentLocation = true;
-      const input = document.getElementById('locationInput');
-      input.value = "";
-      input.placeholder = "지역 또는 주소를 검색하세요";
+      document.getElementById('locationInput').value = "";
+      document.getElementById('locationInput').placeholder = "지역 또는 주소를 검색하세요";
 
       navigator.geolocation.getCurrentPosition(function(position) {
         userLat = position.coords.latitude;
         userLng = position.coords.longitude;
         updateLocationTitle();
         renderPlacesFromJSON();
-      }, function(error) {
+      }, function() {
         alert('위치 정보 접근이 거부되었습니다.');
       });
     }
@@ -305,7 +293,7 @@
       userLat = position.coords.latitude;
       userLng = position.coords.longitude;
       renderPlacesFromJSON();
-    }, function(error) {
+    }, function() {
       alert('위치 정보 접근이 거부되었습니다. 검색창을 이용해주세요.');
     });
   </script>
