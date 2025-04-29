@@ -108,20 +108,17 @@
         `;
         container.appendChild(myCard);
 
-        // ★★★ 디버깅용 fetch (thingproxy 사용) ★★★
-        fetch('https://thingproxy.freeboard.io/fetch/https://9g99.github.io/foodisee-real.kml')
-          .then(response => {
-            console.log('✅ fetch 응답 상태:', response.status);
-            return response.text();
-          })
-          .then(str => {
+        // ★★★ AllOrigins 프록시 사용 fetch ★★★
+        fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://9g99.github.io/foodisee-real.kml'))
+          .then(response => response.json())
+          .then(data => {
+            const str = data.contents; // allorigins는 contents 안에 원본 데이터 있음
             console.log('✅ 받아온 KML 데이터 일부:', str.slice(0, 500));
+
             const xml = new window.DOMParser().parseFromString(str, "text/xml");
             console.log('✅ XML 파싱 완료:', xml);
-            return xml;
-          })
-          .then(data => {
-            const placemarks = data.getElementsByTagNameNS('*', 'Placemark');
+
+            const placemarks = xml.getElementsByTagNameNS('*', 'Placemark');
             console.log('✅ Placemark 개수:', placemarks.length);
 
             Array.from(placemarks).forEach(pm => {
