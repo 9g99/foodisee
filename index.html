@@ -155,6 +155,7 @@
     }
   </style>
 </head>
+
 <body>
   <div class="wrapper">
     <div class="title-container">
@@ -175,9 +176,9 @@
 
     <iframe src="https://www.google.com/maps/d/u/0/embed?mid=1g6Nlmx4DX38L0t0UAZnNQVd9aRd9trw&ehbc=2E312F"
             width="100%" height="600" style="border:0; margin-bottom: 24px;" allowfullscreen="" loading="lazy"></iframe>
-  </div>
 
-  <div id="places" class="card-container"></div>
+    <div id="places" class="card-container"></div>
+  </div>
 
   <script>
     let userLat, userLng;
@@ -185,7 +186,7 @@
 
     function updateLocationTitle() {
       document.getElementById('locationTitle').textContent =
-        isCurrentLocation ? 'My current location' : 'My select location';
+        isCurrentLocation ? 'My current location' : 'My selected location';
     }
 
     function reverseGeocode(lat, lng, callback) {
@@ -209,8 +210,8 @@
     }
 
     function renderPlacesFromJSON() {
-      if (typeof userLat === 'undefined' || typeof userLng === 'undefined') {
-        alert("위치 정보가 설정되지 않아 음식점을 표시할 수 없습니다.");
+      if (typeof userLat !== 'number' || typeof userLng !== 'number') {
+        alert("정확한 위치 정보를 가져오지 못해 음식점을 표시할 수 없습니다.");
         return;
       }
 
@@ -233,7 +234,7 @@
 
           places.forEach(place => {
             const distanceKm = place.distanceMeters / 1000;
-            const walkTime = Math.round(place.distanceMeters / 67); // 평균 속도 0.9m/s
+            const walkTime = Math.round(place.distanceMeters / 67); // 평균 도보 67m/분
 
             const card = document.createElement('div');
             card.className = 'card';
@@ -249,11 +250,14 @@
             container.appendChild(card);
           });
         })
-        .catch(err => console.error("fetch 오류:", err));
+        .catch(err => {
+          console.error("fetch 오류:", err);
+          alert("음식점 정보를 불러오는 데 실패했습니다.");
+        });
     }
 
     function searchLocation() {
-      const query = document.getElementById('locationInput').value;
+      const query = document.getElementById('locationInput').value.trim();
       if (!query) return alert("검색어를 입력해주세요.");
 
       const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`;
@@ -271,6 +275,10 @@
           isCurrentLocation = false;
           updateLocationTitle();
           renderPlacesFromJSON();
+        })
+        .catch(err => {
+          console.error("검색 오류:", err);
+          alert("검색 도중 오류가 발생했습니다.");
         });
     }
 
@@ -284,8 +292,8 @@
         userLng = position.coords.longitude;
         updateLocationTitle();
         renderPlacesFromJSON();
-      }, function() {
-        alert('위치 정보 접근이 거부되었습니다.');
+      }, function(error) {
+        alert('위치 정보를 가져올 수 없습니다. 서비스를 이용할 수 없습니다.');
       });
     }
 
@@ -293,8 +301,8 @@
       userLat = position.coords.latitude;
       userLng = position.coords.longitude;
       renderPlacesFromJSON();
-    }, function() {
-      alert('위치 정보 접근이 거부되었습니다. 검색창을 이용해주세요.');
+    }, function(error) {
+      alert('위치 정보를 가져올 수 없습니다. 서비스를 이용할 수 없습니다.');
     });
   </script>
 </body>
