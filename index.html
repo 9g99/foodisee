@@ -23,7 +23,7 @@
     }
     @media (min-width: 768px) {
       .card-container {
-        grid-template-columns: 1fr; /* 가로 1개 고정 */
+        grid-template-columns: 1fr;
       }
     }
     .card {
@@ -46,8 +46,6 @@
       border-radius: 8px;
       margin-bottom: 12px;
     }
-
-    /* 내 현재 위치 카드 */
     .card.my-location {
       height: 200px;
       justify-content: center;
@@ -55,7 +53,6 @@
     .card.my-location img {
       display: none;
     }
-
     .card-content {
       display: flex;
       flex-direction: column;
@@ -63,7 +60,6 @@
       height: 100%;
       text-align: center;
     }
-
     .card-title {
       font-size: 24px;
       font-weight: bold;
@@ -141,8 +137,7 @@
             const xml = new window.DOMParser().parseFromString(str, "text/xml");
             const placemarks = xml.getElementsByTagNameNS('*', 'Placemark');
 
-            // 최대 10개까지만 노출
-            Array.from(placemarks).slice(0, 10).forEach(pm => {
+            Array.from(placemarks).slice(0, 10).forEach((pm, index) => {
               const name = pm.getElementsByTagNameNS('*', 'name')[0]?.textContent || "맛집";
               const coordsText = pm.getElementsByTagNameNS('*', 'coordinates')[0]?.textContent || "";
               const [lng, lat] = coordsText.trim().split(',').map(Number);
@@ -150,14 +145,14 @@
               const distance = getDistanceFromLatLonInKm(userLat, userLng, lat, lng).toFixed(1);
 
               reverseGeocode(lat, lng, function(storeAddress) {
-                const encodedName = encodeURIComponent(name);
-                const imgSrc = `https://source.unsplash.com/featured/?${encodedName},restaurant`;
+                const imgSrc = `https://source.unsplash.com/featured/?restaurant&sig=${index}`;
+                const searchQuery = encodeURIComponent(name + ' ' + storeAddress);
 
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
-                  <a href="https://maps.google.com/?q=${lat},${lng}" target="_blank">
-                    <img src="${imgSrc}" alt="${name}" onerror="this.onerror=null; this.src='https://source.unsplash.com/featured/?restaurant';">
+                  <a href="https://www.google.com/maps/search/?api=1&query=${searchQuery}" target="_blank">
+                    <img src="${imgSrc}" alt="${name}">
                     <div class="card-content">
                       <div class="card-title">${name}</div>
                       <div class="card-address">${storeAddress}</div>
