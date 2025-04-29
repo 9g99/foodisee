@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>一點一酒 내 주변 맛집 보기</title>
+  <title>Foodisee 내 주변 맛집 보기</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -10,228 +10,118 @@
       margin: 0;
       padding: 20px;
     }
+
     h1 {
-      font-size: 4rem;
+      font-size: 2.5rem;
       text-align: left;
       margin-left: 16px;
     }
+
     .card-container {
       display: grid;
       grid-template-columns: 1fr;
       gap: 24px;
       padding: 16px;
     }
+
     @media (min-width: 768px) {
       .card-container {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(3, 1fr);
       }
     }
+
     .card {
-      background: #ffffff;
-      border: 1px solid #e0e0e0;
-      border-radius: 12px;
-      width: 100%;
-      padding: 16px;
-      box-sizing: border-box;
       position: relative;
+      background: #ffffff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
       display: flex;
       flex-direction: column;
       align-items: center;
-      height: 480px;
-      transition: box-shadow 0.2s;
     }
-    .card img.main-image {
+
+    .card img.main {
       width: 100%;
-      height: 300px;
-      object-fit: cover;
-      border-radius: 8px;
-      margin-bottom: 12px;
-    }
-    .card.my-location {
       height: 200px;
-      justify-content: center;
+      object-fit: cover;
     }
-    .card.my-location img {
-      display: none;
+
+    .card .badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      width: 40px;
+      height: 40px;
     }
-    .card-content {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      height: 100%;
+
+    .card .content {
+      padding: 16px;
       text-align: center;
     }
-    .card-title {
-      font-size: 24px;
+
+    .card .name {
+      font-size: 20px;
       font-weight: bold;
       margin-bottom: 8px;
     }
-    .card-address {
+
+    .card .address {
       font-size: 14px;
       color: #777;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
-    .card-distance {
-      font-size: 16px;
-      color: #555;
-    }
-    .card a {
-      text-decoration: none;
-      color: inherit;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-    /* 순위 배지 */
-    .badge {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      overflow: hidden;
-      background-color: white;
-      border: 2px solid #ddd;
-    }
-    .badge img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    /* FOODISEE 엠블럼 */
-    .logo {
-      position: absolute;
-      top: 16px;
-      left: 16px;
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      overflow: hidden;
-      background-color: white;
-      border: 2px solid #ddd;
-    }
-    .logo img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+
+    .card .distance {
+      font-size: 14px;
+      color: #444;
     }
   </style>
 </head>
 <body>
-  <h1>一點一酒 내 주변 맛집 보기</h1>
-
-  <iframe src="https://www.google.com/maps/d/u/0/embed?mid=1g6Nlmx4DX38L0t0UAZnNQVd9aRd9trw&ehbc=2E312F" width="100%" height="600" style="border:0; margin-bottom: 24px;" allowfullscreen="" loading="lazy"></iframe>
-
+  <h1>Foodisee 내 주변 맛집 보기</h1>
   <div id="places" class="card-container"></div>
 
   <script>
-    const badgeImages = [
-      "https://source.unsplash.com/80x80/?gold-medal",    // 1위
-      "https://source.unsplash.com/80x80/?silver-medal",  // 2위
-      "https://source.unsplash.com/80x80/?bronze-medal",  // 3위
-      "https://source.unsplash.com/80x80/?award",         // 4위
-      "https://source.unsplash.com/80x80/?award",         // 5위
-      "https://source.unsplash.com/80x80/?award",         // 6위
-      "https://source.unsplash.com/80x80/?award",         // 7위
-      "https://source.unsplash.com/80x80/?award",         // 8위
-      "https://source.unsplash.com/80x80/?award",         // 9위
-      "https://source.unsplash.com/80x80/?award"          // 10위
+    const sampleData = [
+      {
+        name: "창평본가",
+        address: "서울특별시 영등포구 양산로 3",
+        distance: "0.7km",
+        img: "./images/sample-food-1.jpg"
+      },
+      {
+        name: "궁전 백반 삼겹살",
+        address: "서울 영등포구 당산1동 321-4",
+        distance: "0.5km",
+        img: "./images/sample-food-2.jpg"
+      },
+      {
+        name: "서도냉면",
+        address: "서울특별시 영등포구 도림로 45",
+        distance: "0.9km",
+        img: "./images/sample-food-3.jpg"
+      }
     ];
 
-    const foodiseeLogo = "https://source.unsplash.com/80x80/?star"; // FOODISEE 엠블럼 임시
+    const container = document.getElementById('places');
 
-    function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
-      const R = 6371;
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLon = (lon2 - lon1) * Math.PI / 180;
-      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                Math.sin(dLon/2) * Math.sin(dLon/2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      return R * c;
-    }
+    sampleData.forEach((place, index) => {
+      const card = document.createElement('div');
+      card.className = 'card';
 
-    function reverseGeocode(lat, lng, callback) {
-      const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
-      fetch(url)
-        .then(response => response.json())
-        .then(data => {
-          callback(data.display_name);
-        })
-        .catch(() => {
-          callback("주소 정보를 가져올 수 없습니다.");
-        });
-    }
+      card.innerHTML = `
+        <img class="main" src="${place.img}" alt="${place.name}">
+        <img class="badge" src="./images/spitfire-style-badge.png" alt="순위 배지">
+        <div class="content">
+          <div class="name">${place.name}</div>
+          <div class="address">${place.address}</div>
+          <div class="distance">${place.distance} 거리</div>
+        </div>
+      `;
 
-    navigator.geolocation.getCurrentPosition(function(position) {
-      const userLat = position.coords.latitude;
-      const userLng = position.coords.longitude;
-
-      reverseGeocode(userLat, userLng, function(address) {
-        const container = document.getElementById('places');
-
-        const myCard = document.createElement('div');
-        myCard.className = 'card my-location';
-        myCard.innerHTML = `
-          <div class="card-title">내 현재 위치</div>
-          <div class="card-distance">${address}</div>
-        `;
-        container.appendChild(myCard);
-
-        fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://9g99.github.io/foodisee/foodisee.xml'))
-          .then(response => response.json())
-          .then(data => {
-            const str = data.contents;
-            const xml = new window.DOMParser().parseFromString(str, "text/xml");
-            const placemarks = xml.getElementsByTagNameNS('*', 'Placemark');
-
-            const places = Array.from(placemarks).map(pm => {
-              const name = pm.getElementsByTagNameNS('*', 'name')[0]?.textContent || "맛집";
-              const coordsText = pm.getElementsByTagNameNS('*', 'coordinates')[0]?.textContent || "";
-              const [lng, lat] = coordsText.trim().split(',').map(Number);
-              const distance = getDistanceFromLatLonInKm(userLat, userLng, lat, lng);
-              return { name, lat, lng, distance };
-            });
-
-            // 거리순 정렬
-            places.sort((a, b) => a.distance - b.distance);
-
-            // 최대 10개까지만 표시
-            places.slice(0, 10).forEach((place, index) => {
-              reverseGeocode(place.lat, place.lng, function(storeAddress) {
-                const searchQuery = encodeURIComponent(place.name + ' ' + storeAddress);
-
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                  <a href="https://www.google.com/maps/search/?api=1&query=${searchQuery}" target="_blank">
-                    <div class="logo">
-                      <img src="${foodiseeLogo}" alt="FOODISEE 인증">
-                    </div>
-                    <div class="badge">
-                      <img src="${badgeImages[index]}" alt="순위 배지">
-                    </div>
-                    <img class="main-image" src="https://source.unsplash.com/800x600/?korean-food&sig=${index}" alt="${place.name}">
-                    <div class="card-content">
-                      <div class="card-title">${place.name}</div>
-                      <div class="card-address">${storeAddress}</div>
-                      <div class="card-distance">${place.distance.toFixed(1)} km 거리</div>
-                    </div>
-                  </a>
-                `;
-                container.appendChild(card);
-              });
-            });
-          })
-          .catch(error => {
-            console.error('❌ fetch 실패:', error);
-          });
-      });
-
-    }, function(error) {
-      alert('위치 정보 접근이 거부되었습니다. 위치 권한을 허용해주세요.');
+      container.appendChild(card);
     });
   </script>
 </body>
