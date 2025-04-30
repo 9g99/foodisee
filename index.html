@@ -182,7 +182,7 @@
               <div class="card-title">${place.name}</div>
               <div class="card-buttons">
                 <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name)}" target="_blank">🗺 지도에서 보기</a>
-                <a href="https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLng}&destination=${place.lat},${place.lng}&travelmode=walking" target="_blank">🚶 길찾기</a>
+                <a href="https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLng}&destination=${encodeURIComponent(place.name)}&travelmode=walking" target="_blank">🚶 길찾기</a>
               </div>
             `;
             container.appendChild(card);
