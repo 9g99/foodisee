@@ -114,7 +114,7 @@
 <body>
   <!-- 초기 소개 섹션 -->
   <section id="intro" class="centered">
-    <h1>FireBall Guide 1.1</h1>
+    <h1>FireBall Guide 1.0</h1>
     <p>내 주변 숨은 맛집을 한눈에 찾아보세요</p>
     <div class="search-container">
       <input type="text" id="locationInput" placeholder="지역 또는 주소를 검색하세요" />
@@ -180,9 +180,9 @@
             card.innerHTML = `
               <img src="${place.image}" alt="${place.name}" />
               <div class="card-title">${place.name}</div>
-              <div class="card-buttons">
-                <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name)}" target="_blank">🗺 지도에서 보기</a>
-                <a href="https://www.google.com/maps/dir/?api=1&origin=My+Location&destination=${encodeURIComponent(place.name)}&travelmode=walking" target="_blank">🚶 길찾기</a>
+              $1
+                <div style="font-size: 1.2rem; color: #999; margin-top: 4px;">* 도보/차량 길찾기는 카카오맵을 이용해 주세요</div>
+                <a href="https://map.kakao.com/link/to/${encodeURIComponent(place.name)},${place.lat},${place.lng}" target="_blank">🚶 길찾기</a>
               </div>
             `;
             container.appendChild(card);
