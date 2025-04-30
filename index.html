@@ -10,131 +10,185 @@
       background-color: #ffffff;
       font-family: 'Roboto', sans-serif;
       color: #202124;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
     }
 
     .centered {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 100px 16px;
       text-align: center;
+      width: 100%;
     }
 
     h1 {
-      font-size: 32px;
+      font-size: 128px;
       font-weight: 500;
-      margin-bottom: 16px;
+      margin-bottom: 32px;
     }
 
     p {
-      font-size: 16px;
+      font-size: 64px;
       color: #5f6368;
-      margin-bottom: 40px;
+      margin-bottom: 80px;
     }
 
-    .search-box {
+    .search-row {
       display: flex;
-      flex-direction: column;
-      gap: 16px;
-      width: 100%;
-      max-width: 360px;
+      justify-content: center;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 64px;
+      flex-wrap: nowrap;
     }
 
     input[type="text"] {
-      font-size: 16px;
-      padding: 14px 16px;
+      font-size: 64px;
+      padding: 32px;
       border: 1px solid #dadce0;
-      border-radius: 4px;
-      outline: none;
+      border-radius: 8px;
+      width: 1000px;
+      max-width: 90%;
     }
 
-    .action-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-    }
-
-    .action-buttons button {
-      font-size: 14px;
-      padding: 10px 20px;
+    .search-btn {
+      font-size: 64px;
+      padding: 32px 64px;
       background-color: #1a73e8;
       color: #fff;
       border: none;
-      border-radius: 4px;
+      border-radius: 8px;
       cursor: pointer;
     }
 
-    .action-buttons button:hover {
+    .search-btn:hover {
       background-color: #1669c1;
     }
 
-    /* 메인 컨텐츠 숨김 */
-    #mainContent {
-      display: none;
+    .link-buttons {
+      display: flex;
+      gap: 80px;
+      justify-content: center;
+      font-size: 64px;
+      font-weight: bold;
+      color: #1a73e8;
+      cursor: pointer;
     }
 
-    .wrapper {
+    .link-buttons span:hover {
+      text-decoration: underline;
+    }
+
+    #mainContent {
+      display: none;
+      max-width: 1200px;
+      width: 100%;
       padding: 32px;
+      box-sizing: border-box;
     }
 
     .card-container {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 24px;
-      padding-bottom: 64px;
+      margin-top: 32px;
     }
 
     .card {
+      background: #ffffff;
       border: 1px solid #e0e0e0;
-      border-radius: 8px;
+      border-radius: 12px;
       padding: 16px;
       text-align: center;
+      box-sizing: border-box;
     }
 
     .card img {
       width: 100%;
-      height: 180px;
+      height: 200px;
       object-fit: cover;
-      border-radius: 4px;
+      border-radius: 8px;
+      margin-bottom: 12px;
     }
 
     .card-title {
-      font-size: 16px;
-      font-weight: 500;
-      margin-top: 12px;
+      font-size: 1.8rem;
+      font-weight: bold;
+      margin-bottom: 8px;
     }
 
     .card-buttons a {
-      display: inline-block;
-      margin: 8px 4px 0;
-      font-size: 14px;
-      color: #1a73e8;
       text-decoration: none;
+      font-size: 1.4rem;
+      margin: 0 6px;
+      color: #007bff;
+    }
+
+    iframe.map-frame {
+      width: 100%;
+      height: 500px;
+      border: none;
+      margin-top: 32px;
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 40px;
+      }
+
+      p {
+        font-size: 20px;
+        margin-bottom: 40px;
+      }
+
+      .search-row {
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      input[type="text"] {
+        font-size: 20px;
+        padding: 16px;
+        width: 90%;
+      }
+
+      .search-btn {
+        font-size: 20px;
+        padding: 16px 32px;
+        width: auto;
+      }
+
+      .link-buttons {
+        font-size: 20px;
+        gap: 32px;
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
     }
   </style>
 </head>
-
 <body>
-  <!-- 인트로 화면 -->
+  <!-- 인트로 -->
   <section id="intro" class="centered">
     <h1>Foodie Sip</h1>
     <p>One delicious bite, One happy sip</p>
 
-    <div class="search-box">
+    <div class="search-row">
       <input type="text" id="locationInput" placeholder="지역 또는 주소를 입력하세요" />
-      <div class="action-buttons">
-        <button onclick="searchLocation()">검색</button>
-        <button onclick="showNearestPlace()">‘가장 가까운’</button>
-        <button onclick="loadCurrentLocation()">‘내 주변’</button>
-      </div>
+      <button class="search-btn" onclick="searchLocation()">검색</button>
+    </div>
+
+    <div class="link-buttons">
+      <span onclick="showNearestPlace()">‘가장 가까운’</span>
+      <span onclick="loadCurrentLocation()">‘내 주변’</span>
     </div>
   </section>
 
-  <!-- 본문: 지도/카드 영역 -->
-  <div id="mainContent" class="wrapper">
-    <h2>📍 선택된 위치: <span id="selectedLocation"></span></h2>
-    <iframe class="map-frame" src="https://www.google.com/maps/d/u/0/embed?mid=1g6Nlmx4DX38L0t0UAZnNQVd9aRd9trw&ehbc=2E312F" width="100%" height="500" frameborder="0" style="border:0" allowfullscreen="" loading="lazy"></iframe>
+  <!-- 본문 -->
+  <div id="mainContent">
+    <h2 style="font-size: 2rem; margin-bottom: 16px;">📍 선택된 위치: <span id="selectedLocation"></span></h2>
+    <iframe class="map-frame" src="https://www.google.com/maps/d/u/0/embed?mid=1g6Nlmx4DX38L0t0UAZnNQVd9aRd9trw&ehbc=2E312F" loading="lazy"></iframe>
     <div id="places" class="card-container"></div>
   </div>
 
@@ -187,8 +241,8 @@
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `
-              <img src="${place.image}" alt="${place.name}">
-              <div class="card-title">${place.name}</div>
+              <img src="${place.image}" alt="${place.name}" />
+              <div class="card-title">${place.name.replace('$1', '').trim()}</div>
               <div class="card-buttons">
                 <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name)}" target="_blank">지도에서 보기</a>
                 <a href="https://map.kakao.com/?sName=내위치&sX=${userLng}&sY=${userLat}&eName=${encodeURIComponent(place.name)}&eX=${place.lng}&eY=${place.lat}&by=FOOT" target="_blank">길찾기</a>
@@ -200,8 +254,9 @@
     }
 
     function searchLocation() {
-      const query = document.getElementById('locationInput').value;
+      const query = document.getElementById('locationInput").value;
       if (!query) return alert("검색어를 입력해주세요.");
+
       fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
         .then(response => response.json())
         .then(results => {
