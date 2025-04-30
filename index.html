@@ -20,45 +20,48 @@
     .centered {
       text-align: center;
       width: 100%;
+      max-width: 480px;
+      padding: 40px 24px;
+      box-sizing: border-box;
     }
 
     h1 {
-      font-size: 128px;
+      font-size: 32px;
       font-weight: 500;
-      margin-bottom: 32px;
+      margin-bottom: 16px;
     }
 
     p {
-      font-size: 64px;
+      font-size: 16px;
       color: #5f6368;
-      margin-bottom: 80px;
+      margin-bottom: 32px;
     }
 
     .search-row {
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 24px;
-      margin-bottom: 64px;
+      gap: 8px;
+      margin-bottom: 24px;
       flex-wrap: nowrap;
     }
 
     input[type="text"] {
-      font-size: 64px;
-      padding: 32px;
+      font-size: 16px;
+      padding: 12px;
       border: 1px solid #dadce0;
-      border-radius: 8px;
-      width: 1000px;
-      max-width: 90%;
+      border-radius: 4px;
+      width: 100%;
+      flex: 1;
     }
 
     .search-btn {
-      font-size: 64px;
-      padding: 32px 64px;
+      font-size: 16px;
+      padding: 12px 24px;
       background-color: #1a73e8;
       color: #fff;
       border: none;
-      border-radius: 8px;
+      border-radius: 4px;
       cursor: pointer;
     }
 
@@ -68,9 +71,9 @@
 
     .link-buttons {
       display: flex;
-      gap: 80px;
+      gap: 24px;
       justify-content: center;
-      font-size: 64px;
+      font-size: 14px;
       font-weight: bold;
       color: #1a73e8;
       cursor: pointer;
@@ -113,16 +116,16 @@
     }
 
     .card-title {
-      font-size: 1.8rem;
+      font-size: 1.2rem;
       font-weight: bold;
       margin-bottom: 8px;
     }
 
     .card-buttons a {
       text-decoration: none;
-      font-size: 1.4rem;
+      font-size: 0.9rem;
       margin: 0 6px;
-      color: #007bff;
+      color: #1a73e8;
     }
 
     iframe.map-frame {
@@ -133,37 +136,16 @@
     }
 
     @media (max-width: 768px) {
-      h1 {
-        font-size: 40px;
-      }
-
-      p {
-        font-size: 20px;
-        margin-bottom: 40px;
-      }
-
-      .search-row {
-        flex-direction: column;
-        gap: 16px;
-      }
-
-      input[type="text"] {
-        font-size: 20px;
+      #mainContent {
         padding: 16px;
-        width: 90%;
       }
 
-      .search-btn {
-        font-size: 20px;
-        padding: 16px 32px;
-        width: auto;
+      .card img {
+        height: 160px;
       }
 
-      .link-buttons {
-        font-size: 20px;
-        gap: 32px;
-        flex-direction: row;
-        flex-wrap: wrap;
+      .card-title {
+        font-size: 1rem;
       }
     }
   </style>
@@ -187,7 +169,7 @@
 
   <!-- 본문 -->
   <div id="mainContent">
-    <h2 style="font-size: 2rem; margin-bottom: 16px;">📍 선택된 위치: <span id="selectedLocation"></span></h2>
+    <h2 style="font-size: 1.2rem; margin-bottom: 16px;">📍 선택된 위치: <span id="selectedLocation"></span></h2>
     <iframe class="map-frame" src="https://www.google.com/maps/d/u/0/embed?mid=1g6Nlmx4DX38L0t0UAZnNQVd9aRd9trw&ehbc=2E312F" loading="lazy"></iframe>
     <div id="places" class="card-container"></div>
   </div>
@@ -254,7 +236,7 @@
     }
 
     function searchLocation() {
-      const query = document.getElementById('locationInput").value;
+      const query = document.getElementById('locationInput').value;
       if (!query) return alert("검색어를 입력해주세요.");
 
       fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
