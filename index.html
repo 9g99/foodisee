@@ -1,63 +1,63 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Foodie Sip</title>
   <style>
-    body {
+    html, body {
       margin: 0;
       padding: 0;
       background-color: #ffffff;
       font-family: 'Roboto', sans-serif;
       color: #202124;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
     }
 
-    .centered {
-      text-align: center;
-      width: 100%;
-      max-width: 480px;
-      padding: 48px 24px;
+    #intro {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
       box-sizing: border-box;
+      padding: 32px 16px;
+      text-align: center;
     }
 
     h1 {
-      font-size: 40px;
+      font-size: 52px; /* 30% 확대 */
       font-weight: 500;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
     }
 
     p {
-      font-size: 18px;
+      font-size: 24px;
       color: #5f6368;
-      margin-bottom: 36px;
+      margin-bottom: 40px;
     }
 
     .search-row {
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
       margin-bottom: 28px;
-      flex-wrap: nowrap;
+      width: 100%;
+      max-width: 480px;
     }
 
     input[type="text"] {
-      font-size: 18px;
-      padding: 14px;
+      font-size: 20px;
+      padding: 16px;
+      flex: 1;
       border: 1px solid #dadce0;
       border-radius: 4px;
-      width: 100%;
-      flex: 1;
     }
 
     .search-btn {
-      font-size: 18px;
-      padding: 14px 26px;
+      font-size: 20px;
+      padding: 16px 32px;
       background-color: #1a73e8;
       color: #fff;
       border: none;
@@ -71,9 +71,9 @@
 
     .link-buttons {
       display: flex;
-      gap: 28px;
+      gap: 32px;
       justify-content: center;
-      font-size: 16px;
+      font-size: 18px;
       font-weight: bold;
       color: #1a73e8;
       cursor: pointer;
@@ -83,6 +83,7 @@
       text-decoration: underline;
     }
 
+    /* 본문 영역 */
     #mainContent {
       display: none;
       max-width: 1200px;
@@ -147,12 +148,17 @@
       .card-title {
         font-size: 1rem;
       }
+
+      .link-buttons {
+        flex-direction: column;
+        gap: 12px;
+      }
     }
   </style>
 </head>
 <body>
-  <!-- 인트로 -->
-  <section id="intro" class="centered">
+  <!-- 인트로 화면 -->
+  <section id="intro">
     <h1>Foodie Sip</h1>
     <p>One delicious bite, One happy sip</p>
 
@@ -167,7 +173,7 @@
     </div>
   </section>
 
-  <!-- 본문 -->
+  <!-- 본문 영역 -->
   <div id="mainContent">
     <h2 style="font-size: 1.2rem; margin-bottom: 16px;">📍 선택된 위치: <span id="selectedLocation"></span></h2>
     <iframe class="map-frame" src="https://www.google.com/maps/d/u/0/embed?mid=1g6Nlmx4DX38L0t0UAZnNQVd9aRd9trw&ehbc=2E312F" loading="lazy"></iframe>
@@ -200,6 +206,7 @@
     function showMainContent() {
       document.getElementById('intro').style.display = 'none';
       document.getElementById('mainContent').style.display = 'block';
+      document.body.style.overflow = 'auto'; // 스크롤 다시 허용
     }
 
     function renderPlacesFromJSON(limit = 10) {
