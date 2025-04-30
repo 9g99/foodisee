@@ -312,12 +312,17 @@
       const input = document.getElementById('locationInput');
       input.value = "";
       input.placeholder = "지역 또는 주소를 검색하세요";
+      
+      navigator.geolocation.getCurrentPosition(function(position) {
+        userLat = position.coords.latitude;
+        userLng = position.coords.longitude;
 
-      userLat = 37.5157;
-      userLng = 126.9074;
-
-      updateLocationTitle();
-      renderPlacesFromJSON();
+        updateLocationTitle();
+        renderPlacesFromJSON();
+      }, function(error) {
+        console.warn("Geolocation 접근 실패, 임시 좌표 사용");
+        alert("현재 위치를 가져올 수 없습니다.");
+      });
     }
 
     navigator.geolocation.getCurrentPosition(function(position) {
