@@ -80,18 +80,35 @@
 
     .link-buttons {
       display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 20px;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 44px;
       font-size: 32px;
       font-weight: bold;
       color: #1a73e8;
-      cursor: default;
+      cursor: pointer;
+      margin-bottom: 36px;
     }
 
     .link-buttons span:hover {
       text-decoration: underline;
-      cursor: pointer;
+    }
+
+    .additional-text {
+      font-size: 28px;
+      color: #000;
+      font-weight: 500;
+      margin-top: 40px;
+      margin-bottom: 8px;
+    }
+
+    .blog-link {
+      font-size: 26px;
+      color: #1a73e8;
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 16px;
     }
 
     #mainContent {
@@ -189,9 +206,9 @@
         <span onclick="loadCurrentLocation()">‘내 주변’</span>
       </div>
 
-      <div class="link-buttons" style="margin-top: 40px;">
-        <span>The editor's food journey, one bite and one drink at a time.</span>
-        <span>Foodie Sip Blog</span>
+      <div>
+        <div class="additional-text">The editor's food journey, one bite and one drink at a time.</div>
+        <a href="https://m.blog.naver.com/ggommi_c" target="_blank" class="blog-link">Foodie Sip Blog</a>
       </div>
     </div>
   </section>
