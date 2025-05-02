@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Foodie Sip</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
   <style>
     html, body {
       margin: 0;
@@ -17,9 +17,7 @@
 
     #intro {
       position: relative;
-      height: 100%;
-      min-height: 100vh;
-      overflow: auto;
+      height: 100vh;
     }
 
     .centered {
@@ -28,6 +26,7 @@
       left: 6%;
       transform: none;
       width: 88%;
+      max-width: 100%;
       box-sizing: border-box;
       text-align: left;
     }
@@ -36,12 +35,14 @@
       font-size: 88px;
       font-weight: 900;
       margin-bottom: 24px;
+      text-align: left;
     }
 
     p {
       font-size: 42px;
       color: #5f6368;
       margin-bottom: 40px;
+      text-align: left;
     }
 
     .search-row {
@@ -50,7 +51,9 @@
       align-items: center;
       gap: 16px;
       margin-bottom: 36px;
+      padding: 0;
       width: 100%;
+      box-sizing: border-box;
     }
 
     input[type="text"] {
@@ -69,6 +72,7 @@
       border: none;
       border-radius: 9999px;
       cursor: pointer;
+      white-space: nowrap;
     }
 
     .search-btn:hover {
@@ -77,6 +81,9 @@
 
     .link-buttons {
       display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
       gap: 44px;
       font-size: 32px;
       font-weight: bold;
@@ -99,7 +106,7 @@
 
     .blog-link {
       font-size: 32px;
-      font-weight: bold;
+      font-weight: bold; 
       color: #1a73e8;
       text-decoration: none;
       display: inline-block;
@@ -197,8 +204,8 @@
       </div>
 
       <div class="link-buttons">
-        <span onclick="showNearestPlace()">‘Nearest’</span>
-        <span onclick="loadCurrentLocation()">‘Around’</span>
+        <span onclick="showNearestPlace()">‘가장 가까운’</span>
+        <span onclick="loadCurrentLocation()">‘내 주변’</span>
       </div>
 
       <div>
@@ -237,11 +244,10 @@
       return R * c;
     }
 
-    function showMainContent(mode) {
+    function showMainContent() {
       document.getElementById('intro').style.display = 'none';
       document.getElementById('mainContent').style.display = 'block';
       document.body.style.overflow = 'auto';
-      history.pushState({ page: 'main', mode: mode }, '', `?${mode}`);
     }
 
     function renderPlacesFromJSON(limit = 10) {
@@ -269,6 +275,7 @@
               <div class="card-title">${place.name.replace('$1', '').trim()}</div>
               <div class="card-buttons">
                 <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name)}" target="_blank">지도에서 보기</a>
+                <a href="https://map.kakao.com/?sName=내위치&sX=${userLng}&sY=${userLat}&eName=${encodeURIComponent(place.name)}&eX=${place.lng}&eY=${place.lat}&by=FOOT" target="_blank">길찾기</a>
               </div>
             `;
             container.appendChild(card);
@@ -289,7 +296,7 @@
           }
           userLat = parseFloat(results[0].lat);
           userLng = parseFloat(results[0].lon);
-          showMainContent('search');
+          showMainContent();
           renderPlacesFromJSON();
         });
     }
@@ -298,7 +305,7 @@
       navigator.geolocation.getCurrentPosition(function(position) {
         userLat = position.coords.latitude;
         userLng = position.coords.longitude;
-        showMainContent('around');
+        showMainContent();
         renderPlacesFromJSON();
       }, function() {
         alert("위치 접근에 실패했습니다.");
@@ -309,28 +316,12 @@
       navigator.geolocation.getCurrentPosition(function(position) {
         userLat = position.coords.latitude;
         userLng = position.coords.longitude;
-        showMainContent('nearest');
+        showMainContent();
         renderPlacesFromJSON(1);
       }, function() {
         alert("위치 접근에 실패했습니다.");
       });
     }
-
-    window.addEventListener('popstate', function (event) {
-      const params = new URLSearchParams(location.search);
-      if (!params.has('nearest') && !params.has('around') && !params.has('search')) {
-        document.getElementById('mainContent').style.display = 'none';
-        document.getElementById('intro').style.display = 'block';
-        document.body.style.overflow = 'hidden';
-      }
-    });
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const params = new URLSearchParams(location.search);
-      if (params.has('nearest')) showNearestPlace();
-      else if (params.has('around')) loadCurrentLocation();
-      else if (params.has('search')) searchLocation();
-    });
   </script>
 </body>
 </html>
