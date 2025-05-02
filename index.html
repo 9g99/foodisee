@@ -1,327 +1,164 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8" />
-  <title>Foodie Sip</title>
+<script>
+  let userLat, userLng;
 
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      overflow: hidden;
-      background-color: #ffffff;
-      font-family: 'Roboto', sans-serif;
-      color: #202124;
-    }
+  function reverseGeocode(lat, lng, callback) {
+    const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
+    fetch(url)
+      .then(response => response.json())
+      .then(data => callback(data.display_name))
+      .catch(() => callback("주소 정보를 가져올 수 없습니다."));
+  }
 
-    #intro {
-      position: relative;
-      height: 100vh;
-    }
+  function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
+    const R = 6371000;
+    const toRad = x => x * Math.PI / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
 
-    .centered {
-      position: absolute;
-      top: 20%;
-      left: 6%;
-      transform: none;
-      width: 88%;
-      max-width: 100%;
-      box-sizing: border-box;
-      text-align: left;
-    }
+  function showMainContent() {
+    document.getElementById('intro').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+    document.body.style.overflow = 'auto';
+  }
 
-    h1 {
-      font-size: 88px;
-      font-weight: 900;
-      margin-bottom: 24px;
-      text-align: left;
-    }
+  function renderPlacesFromJSON(limit = 10) {
+    reverseGeocode(userLat, userLng, function(address) {
+      document.getElementById('selectedLocation').textContent = address;
+    });
 
-    p {
-      font-size: 42px;
-      color: #5f6368;
-      margin-bottom: 40px;
-      text-align: left;
-    }
+    const container = document.getElementById('places');
+    container.innerHTML = '';
 
-    .search-row {
-      display: flex;
-      justify-content: flex-start;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 36px;
-      padding: 0;
-      width: 100%;
-      box-sizing: border-box;
-    }
+    fetch('https://raw.githubusercontent.com/9g99/foodisee/main/data/stores.json')
+      .then(response => response.json())
+      .then(data => {
+        const places = data.map(place => {
+          const distance = getDistanceFromLatLonInMeters(userLat, userLng, place.lat, place.lng);
+          return { ...place, distanceMeters: distance };
+        }).sort((a, b) => a.distanceMeters - b.distanceMeters)
+          .slice(0, limit);
 
-    input[type="text"] {
-      font-size: 34px;
-      padding: 32px 24px;
-      flex: 1;
-      border: 1px solid #b0b0b0;
-      border-radius: 9999px;
-    }
-
-    .search-btn {
-      font-size: 34px;
-      padding: 32px 60px;
-      background-color: #1a73e8;
-      color: #fff;
-      border: none;
-      border-radius: 9999px;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-
-    .search-btn:hover {
-      background-color: #1669c1;
-    }
-
-    .link-buttons {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 44px;
-      font-size: 32px;
-      font-weight: bold;
-      color: #1a73e8;
-      cursor: pointer;
-      margin-bottom: 36px;
-    }
-
-    .link-buttons span:hover {
-      text-decoration: underline;
-    }
-
-    .additional-text {
-      font-size: 32px;
-      color: #000;
-      font-weight: 500;
-      margin-top: 100px;
-      margin-bottom: 8px;
-    }
-
-    .blog-link {
-      font-size: 32px;
-      font-weight: bold; 
-      color: #1a73e8;
-      text-decoration: none;
-      display: inline-block;
-      margin-top: 16px;
-    }
-
-    #mainContent {
-      display: none;
-      max-width: 1200px;
-      width: 100%;
-      padding: 32px;
-      box-sizing: border-box;
-    }
-
-    .card-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 24px;
-      margin-top: 32px;
-    }
-
-    .card {
-      background: #ffffff;
-      border: 1px solid #e0e0e0;
-      border-radius: 12px;
-      padding: 16px;
-      text-align: center;
-      box-sizing: border-box;
-    }
-
-    .card img {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-      border-radius: 8px;
-      margin-bottom: 12px;
-    }
-
-    .card-title {
-      font-size: 1.2rem;
-      font-weight: bold;
-      margin-bottom: 8px;
-    }
-
-    .card-buttons a {
-      text-decoration: none;
-      font-size: 0.9rem;
-      margin: 0 6px;
-      color: #1a73e8;
-    }
-
-    iframe.map-frame {
-      width: 100%;
-      height: 500px;
-      border: none;
-      margin-top: 32px;
-    }
-
-    @media (max-width: 768px) {
-      .card img {
-        height: 160px;
-      }
-
-      .card-title {
-        font-size: 1rem;
-      }
-
-      .link-buttons {
-        flex-direction: column;
-        gap: 12px;
-      }
-
-      .search-row {
-        flex-direction: column;
-        gap: 20px;
-        padding: 0 16px;
-      }
-
-      input[type="text"],
-      .search-btn {
-        width: 100%;
-      }
-    }
-  </style>
-</head>
-<body>
-  <section id="intro">
-    <div class="centered">
-      <h1>Foodie Sip</h1>
-      <p>One delicious bite, One happy sip</p>
-
-      <div class="search-row">
-        <input type="text" id="locationInput" placeholder="지역 또는 주소를 입력하세요" />
-        <button class="search-btn" onclick="searchLocation()">검색</button>
-      </div>
-
-      <div class="link-buttons">
-        <span onclick="showNearestPlace()">‘Nearest’</span>
-        <span onclick="loadCurrentLocation()">‘Around’</span>
-      </div>
-
-      <div>
-        <div class="additional-text">The editor's food journey, one bite and one drink at a time.</div>
-        <a href="https://m.blog.naver.com/ggommi_c" target="_blank" class="blog-link">Foodie Sip Blog</a>
-      </div>
-    </div>
-  </section>
-
-  <div id="mainContent">
-    <h2 style="font-size: 1.2rem; margin-bottom: 16px;">📍 선택된 위치: <span id="selectedLocation"></span></h2>
-    <iframe class="map-frame" src="https://www.google.com/maps/d/u/0/embed?mid=1g6Nlmx4DX38L0t0UAZnNQVd9aRd9trw&ehbc=2E312F" loading="lazy"></iframe>
-    <div id="places" class="card-container"></div>
-  </div>
-
-  <script>
-    let userLat, userLng;
-
-    function reverseGeocode(lat, lng, callback) {
-      const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
-      fetch(url)
-        .then(response => response.json())
-        .then(data => callback(data.display_name))
-        .catch(() => callback("주소 정보를 가져올 수 없습니다."));
-    }
-
-    function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
-      const R = 6371000;
-      const toRad = x => x * Math.PI / 180;
-      const dLat = toRad(lat2 - lat1);
-      const dLon = toRad(lon2 - lon1);
-      const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-                Math.sin(dLon / 2) * Math.sin(dLon / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c;
-    }
-
-    function showMainContent() {
-      document.getElementById('intro').style.display = 'none';
-      document.getElementById('mainContent').style.display = 'block';
-      document.body.style.overflow = 'auto';
-    }
-
-    function renderPlacesFromJSON(limit = 10) {
-      reverseGeocode(userLat, userLng, function(address) {
-        document.getElementById('selectedLocation').textContent = address;
-      });
-
-      const container = document.getElementById('places');
-      container.innerHTML = '';
-
-      fetch('https://raw.githubusercontent.com/9g99/foodisee/main/data/stores.json')
-        .then(response => response.json())
-        .then(data => {
-          const places = data.map(place => {
-            const distance = getDistanceFromLatLonInMeters(userLat, userLng, place.lat, place.lng);
-            return { ...place, distanceMeters: distance };
-          }).sort((a, b) => a.distanceMeters - b.distanceMeters)
-            .slice(0, limit);
-
-          places.forEach(place => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `
-              <img src="${place.image}" alt="${place.name}" />
-              <div class="card-title">${place.name.replace('$1', '').trim()}</div>
-              <div class="card-buttons">
-                <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name)}" target="_blank">지도에서 보기</a>
-                <a href="https://map.kakao.com/?sName=내위치&sX=${userLng}&sY=${userLat}&eName=${encodeURIComponent(place.name)}&eX=${place.lng}&eY=${place.lat}&by=FOOT" target="_blank">길찾기</a>
-              </div>
-            `;
-            container.appendChild(card);
-          });
+        places.forEach(place => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <img src="${place.image}" alt="${place.name}" />
+            <div class="card-title">${place.name.replace('$1', '').trim()}</div>
+            <div class="card-buttons">
+              <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name)}" target="_blank">지도에서 보기</a>
+              <a href="https://map.kakao.com/?sName=내위치&sX=${userLng}&sY=${userLat}&eName=${encodeURIComponent(place.name)}&eX=${place.lng}&eY=${place.lat}&by=FOOT" target="_blank">길찾기</a>
+            </div>
+          `;
+          container.appendChild(card);
         });
-    }
+      });
+  }
 
-    function searchLocation() {
-      const query = document.getElementById('locationInput').value;
-      if (!query) return alert("검색어를 입력해주세요.");
+  function searchLocation() {
+    const query = document.getElementById('locationInput').value;
+    if (!query) return alert("검색어를 입력해주세요.");
 
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
+      .then(response => response.json())
+      .then(results => {
+        if (results.length === 0) {
+          alert("검색 결과가 없습니다.");
+          return;
+        }
+
+        userLat = parseFloat(results[0].lat);
+        userLng = parseFloat(results[0].lon);
+
+        // URL 상태 갱신
+        history.pushState({ mode: 'search' }, '', '?search=' + encodeURIComponent(query));
+
+        showMainContent();
+        renderPlacesFromJSON();
+      });
+  }
+
+  function loadCurrentLocation() {
+    navigator.geolocation.getCurrentPosition(function(position) {
+      userLat = position.coords.latitude;
+      userLng = position.coords.longitude;
+
+      history.pushState({ mode: 'around' }, '', '?around');
+
+      showMainContent();
+      renderPlacesFromJSON();
+    }, function() {
+      alert("위치 접근에 실패했습니다.");
+    });
+  }
+
+  function showNearestPlace() {
+    navigator.geolocation.getCurrentPosition(function(position) {
+      userLat = position.coords.latitude;
+      userLng = position.coords.longitude;
+
+      history.pushState({ mode: 'nearest' }, '', '?nearest');
+
+      showMainContent();
+      renderPlacesFromJSON(1);
+    }, function() {
+      alert("위치 접근에 실패했습니다.");
+    });
+  }
+
+  // 최초 진입 시 URL 파라미터 감지
+  document.addEventListener('DOMContentLoaded', function () {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('nearest')) {
+      showNearestPlace();
+    } else if (params.has('around')) {
+      loadCurrentLocation();
+    } else if (params.has('search')) {
+      const query = params.get('search');
+      document.getElementById('locationInput').value = query;
       fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
         .then(response => response.json())
         .then(results => {
-          if (results.length === 0) {
-            alert("검색 결과가 없습니다.");
-            return;
+          if (results.length > 0) {
+            userLat = parseFloat(results[0].lat);
+            userLng = parseFloat(results[0].lon);
+            showMainContent();
+            renderPlacesFromJSON();
           }
-          userLat = parseFloat(results[0].lat);
-          userLng = parseFloat(results[0].lon);
-          showMainContent();
-          renderPlacesFromJSON();
         });
     }
+  });
 
-    function loadCurrentLocation() {
-      navigator.geolocation.getCurrentPosition(function(position) {
-        userLat = position.coords.latitude;
-        userLng = position.coords.longitude;
-        showMainContent();
-        renderPlacesFromJSON();
-      }, function() {
-        alert("위치 접근에 실패했습니다.");
-      });
+  // 뒤로가기/앞으로가기 감지
+  window.onpopstate = function () {
+    const params = new URLSearchParams(location.search);
+    if (params.has('nearest')) {
+      showNearestPlace();
+    } else if (params.has('around')) {
+      loadCurrentLocation();
+    } else if (params.has('search')) {
+      const query = params.get('search');
+      document.getElementById('locationInput').value = query;
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(results => {
+          if (results.length > 0) {
+            userLat = parseFloat(results[0].lat);
+            userLng = parseFloat(results[0].lon);
+            showMainContent();
+            renderPlacesFromJSON();
+          }
+        });
+    } else {
+      // 인트로 화면 복귀
+      document.getElementById('mainContent').style.display = 'none';
+      document.getElementById('intro').style.display = 'block';
+      document.body.style.overflow = 'hidden';
     }
-
-    function showNearestPlace() {
-      navigator.geolocation.getCurrentPosition(function(position) {
-        userLat = position.coords.latitude;
-        userLng = position.coords.longitude;
-        showMainContent();
-        renderPlacesFromJSON(1);
-      }, function() {
-        alert("위치 접근에 실패했습니다.");
-      });
-    }
-  </script>
-</body>
-</html>
+  };
+</script>
