@@ -197,8 +197,8 @@
       </div>
 
       <div class="link-buttons">
-        <span onclick="showNearestPlace()">‘가장 가까운’</span>
-        <span onclick="loadCurrentLocation()">‘내 주변’</span>
+        <span onclick="showNearestPlace()">‘Nearest’</span>
+        <span onclick="loadCurrentLocation()">‘Around’</span>
       </div>
 
       <div>
@@ -237,11 +237,11 @@
       return R * c;
     }
 
-    function showMainContent() {
+    function showMainContent(mode) {
       document.getElementById('intro').style.display = 'none';
       document.getElementById('mainContent').style.display = 'block';
       document.body.style.overflow = 'auto';
-      history.pushState({ page: "main" }, '', '#main');
+      history.pushState({ page: 'main', mode: mode }, '', `?${mode}`);
     }
 
     function renderPlacesFromJSON(limit = 10) {
@@ -289,7 +289,7 @@
           }
           userLat = parseFloat(results[0].lat);
           userLng = parseFloat(results[0].lon);
-          showMainContent();
+          showMainContent('search');
           renderPlacesFromJSON();
         });
     }
@@ -298,7 +298,7 @@
       navigator.geolocation.getCurrentPosition(function(position) {
         userLat = position.coords.latitude;
         userLng = position.coords.longitude;
-        showMainContent();
+        showMainContent('around');
         renderPlacesFromJSON();
       }, function() {
         alert("위치 접근에 실패했습니다.");
@@ -309,20 +309,27 @@
       navigator.geolocation.getCurrentPosition(function(position) {
         userLat = position.coords.latitude;
         userLng = position.coords.longitude;
-        showMainContent();
+        showMainContent('nearest');
         renderPlacesFromJSON(1);
       }, function() {
         alert("위치 접근에 실패했습니다.");
       });
     }
 
-    // ✅ 뒤로가기 시 인트로 화면으로 복귀
     window.addEventListener('popstate', function (event) {
-      if (!event.state || event.state.page !== 'main') {
+      const params = new URLSearchParams(location.search);
+      if (!params.has('nearest') && !params.has('around') && !params.has('search')) {
         document.getElementById('mainContent').style.display = 'none';
         document.getElementById('intro').style.display = 'block';
         document.body.style.overflow = 'hidden';
       }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(location.search);
+      if (params.has('nearest')) showNearestPlace();
+      else if (params.has('around')) loadCurrentLocation();
+      else if (params.has('search')) searchLocation();
     });
   </script>
 </body>
