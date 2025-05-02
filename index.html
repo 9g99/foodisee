@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Foodie Sip</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
   <style>
     html, body {
@@ -26,7 +27,6 @@
       left: 6%;
       transform: none;
       width: 88%;
-      max-width: 100%;
       box-sizing: border-box;
       text-align: left;
     }
@@ -35,14 +35,12 @@
       font-size: 88px;
       font-weight: 900;
       margin-bottom: 24px;
-      text-align: left;
     }
 
     p {
       font-size: 42px;
       color: #5f6368;
       margin-bottom: 40px;
-      text-align: left;
     }
 
     .search-row {
@@ -51,9 +49,7 @@
       align-items: center;
       gap: 16px;
       margin-bottom: 36px;
-      padding: 0;
       width: 100%;
-      box-sizing: border-box;
     }
 
     input[type="text"] {
@@ -72,7 +68,6 @@
       border: none;
       border-radius: 9999px;
       cursor: pointer;
-      white-space: nowrap;
     }
 
     .search-btn:hover {
@@ -81,9 +76,6 @@
 
     .link-buttons {
       display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: flex-start;
       gap: 44px;
       font-size: 32px;
       font-weight: bold;
@@ -106,7 +98,7 @@
 
     .blog-link {
       font-size: 32px;
-      font-weight: bold; 
+      font-weight: bold;
       color: #1a73e8;
       text-decoration: none;
       display: inline-block;
@@ -132,14 +124,16 @@
       background: #ffffff;
       border: 1px solid #e0e0e0;
       border-radius: 12px;
-      padding: 16px;
+      padding: 24px;
       text-align: center;
       box-sizing: border-box;
+      min-height: 480px;
     }
 
     .card img {
       width: 100%;
-      height: 200px;
+      height: auto;
+      max-height: 360px;
       object-fit: cover;
       border-radius: 8px;
       margin-bottom: 12px;
@@ -248,7 +242,17 @@
       document.getElementById('intro').style.display = 'none';
       document.getElementById('mainContent').style.display = 'block';
       document.body.style.overflow = 'auto';
+      history.pushState({ page: "main" }, '', '#main');
     }
+
+    window.addEventListener('popstate', function (event) {
+      if (!event.state || event.state.page !== 'main') {
+        document.getElementById('mainContent').style.display = 'none';
+        document.getElementById('intro').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        document.querySelector('.map-frame').style.display = 'block';
+      }
+    });
 
     function renderPlacesFromJSON(limit = 10) {
       reverseGeocode(userLat, userLng, function(address) {
@@ -275,7 +279,6 @@
               <div class="card-title">${place.name.replace('$1', '').trim()}</div>
               <div class="card-buttons">
                 <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name)}" target="_blank">지도에서 보기</a>
-                <a href="https://map.kakao.com/?sName=내위치&sX=${userLng}&sY=${userLat}&eName=${encodeURIComponent(place.name)}&eX=${place.lng}&eY=${place.lat}&by=FOOT" target="_blank">길찾기</a>
               </div>
             `;
             container.appendChild(card);
@@ -297,6 +300,7 @@
           userLat = parseFloat(results[0].lat);
           userLng = parseFloat(results[0].lon);
           showMainContent();
+          document.querySelector('.map-frame').style.display = 'block';
           renderPlacesFromJSON();
         });
     }
@@ -306,6 +310,7 @@
         userLat = position.coords.latitude;
         userLng = position.coords.longitude;
         showMainContent();
+        document.querySelector('.map-frame').style.display = 'block';
         renderPlacesFromJSON();
       }, function() {
         alert("위치 접근에 실패했습니다.");
@@ -317,6 +322,7 @@
         userLat = position.coords.latitude;
         userLng = position.coords.longitude;
         showMainContent();
+        document.querySelector('.map-frame').style.display = 'none';
         renderPlacesFromJSON(1);
       }, function() {
         alert("위치 접근에 실패했습니다.");
